@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Dinero">
+    <link rel="apple-touch-icon" href="icono.png">
+    <link rel="icon" type="image/png" href="icono.png">
+    
+    <title>Dinero - Mi Espacio</title>
+    <style>
+        :root {
+            /* Paleta de colores Retro Pop */
+            --bg-main: #dbe9d0c4;
+            --dark-green: #0C493D;
+            --lavender: #A18CEE;
+            --mint-green: #9CF6A8;
+            --peach-orange: #FA8E62;
+            --pale-yellow: #FDF1C2;
+            --pastel-pink: #FFB3C6;
+            --text-dark: #1A1C1A;
+            --text-light: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* --- Barra Superior --- */
+        .top-bar {
+            width: 100%;
+            background-color: transparent;
+            padding: calc(15px + env(safe-area-inset-top)) 20px 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .top-bar .page-title {
+            font-family: "Georgia", serif;
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--dark-green);
+        }
+
+        /* --- Contenedor Principal --- */
+        .container {
+            width: 100%;
+            max-width: 420px;
+            padding: 10px 20px calc(130px + env(safe-area-inset-bottom));
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- WIDGET PRINCIPAL: Balance con Barra de Progreso --- */
+        .widget-balance {
+            background-color: var(--pale-yellow);
+            border-radius: 32px;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .pill-tag {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--mint-green);
+            color: var(--dark-green);
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .widget-balance .label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            opacity: 0.7;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--dark-green);
+        }
+
+        .widget-balance .amount {
+            font-size: 3.5rem;
+            font-weight: 800;
+            font-family: "Georgia", serif;
+            color: var(--dark-green);
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+
+        /* Barra de Porcentaje Visual */
+        .progress-bar-bg {
+            width: 100%;
+            height: 14px;
+            background-color: rgba(26, 28, 26, 0.1);
+            border-radius: 20px;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .progress-fill-deben {
+            height: 100%;
+            background-color: var(--pastel-pink); /* Rojo/Rosa pastel */
+            transition: width 0.5s ease-in-out;
+        }
+
+        .progress-fill-mano {
+            height: 100%;
+            background-color: var(--dark-green); /* Verde */
+            transition: width 0.5s ease-in-out;
+        }
+
+        .progress-labels {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--dark-green);
+            opacity: 0.8;
+        }
+
+        /* --- GRID DE DOS COLUMNAS --- */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .widget-col {
+            border-radius: 32px;
+            padding: 22px 18px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .widget-deben { background-color: var(--peach-orange); color: var(--text-dark); }
+        .widget-mano { background-color: var(--mint-green); color: var(--dark-green); }
+
+        /* Marca de Agua (Ícono gigante de fondo) */
+        .watermark-icon {
+            position: absolute;
+            bottom: -15px;
+            right: -15px;
+            width: 120px;
+            height: 120px;
+            opacity: 0.1;
+            transform: rotate(-15deg);
+            pointer-events: none;
+        }
+
+        .widget-header {
+            font-family: "Georgia", serif;
+            font-size: 1.25rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 15px;
+            z-index: 1;
+        }
+
+        .widget-header svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            fill: none;
+            stroke-linecap: round;
+        }
+
+        /* Campos de Entrada en forma de Píldora */
+        .input-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.35);
+            border-radius: 16px;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+            z-index: 1;
+        }
+
+        .input-row:focus-within {
+            background-color: rgba(255, 255, 255, 0.95);
+            transform: scale(1.02);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .input-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            opacity: 0.9;
+        }
+
+        .input-box {
+            display: flex;
+            align-items: center;
+            width: 70px;
+        }
+
+        .input-box span {
+            font-size: 0.95rem;
+            font-weight: 800;
+            margin-right: 2px;
+            opacity: 0.7;
+        }
+
+        .input-field {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            text-align: right;
+            outline: none;
+            padding: 0;
+        }
+
+        /* Subtotales */
+        .widget-subtotal {
+            margin-top: auto;
+            padding-top: 15px;
+            font-family: "Georgia", serif;
+            font-size: 1.3rem;
+            font-weight: 800;
+            text-align: right;
+            z-index: 1;
+        }
+
+        /* --- BARRA INFERIOR --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: calc(20px + env(safe-area-inset-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 30px);
+            max-width: 380px;
+            background-color: var(--text-light);
+            border: 3px solid var(--text-dark);
+            border-radius: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 15px;
+            box-shadow: 6px 6px 0px var(--text-dark);
+            z-index: 100;
+        }
+        .nav-item { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 16px; color: var(--text-dark); opacity: 0.5; transition: all 0.2s; }
+        .nav-item:active { opacity: 1; transform: scale(0.9); }
+        .nav-item.home-btn { width: 60px; height: 60px; border-radius: 50%; background-color: var(--peach-orange); color: var(--text-dark); opacity: 1; border: 3px solid var(--text-dark); box-shadow: 0px 4px 0px var(--text-dark); transform: translateY(-12px); flex-shrink: 0; }
+        .nav-item.home-btn:active { transform: translateY(-8px); box-shadow: 0px 0px 0px var(--text-dark); }
+        .nav-item svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Barra Superior -->
+    <nav class="top-bar">
+        <div class="page-title">Balance</div>
+    </nav>
+
+    <div class="container">
+
+        <!-- Widget Balance Total con Barra Visual -->
+        <div class="widget-balance">
+            <span class="pill-tag">Neto</span>
+            <div class="label">Total Global</div>
+            <div class="amount" id="grand-total">$0</div>
+            
+            <!-- Barra de Progreso -->
+            <div class="progress-bar-bg">
+                <div class="progress-fill-deben" id="bar-deben" style="width: 50%;"></div>
+                <div class="progress-fill-mano" id="bar-mano" style="width: 50%;"></div>
+            </div>
+            <div class="progress-labels">
+                <span>Por Cobrar (<span id="pct-deben">50</span>%)</span>
+                <span>Liquidez (<span id="pct-mano">50</span>%)</span>
+            </div>
+        </div>
+
+        <!-- Grid Bento -->
+        <div class="bento-grid">
+            
+            <!-- Widget: Me Deben -->
+            <div class="widget-col widget-deben">
+                <!-- Marca de agua vectorial -->
+                <svg class="watermark-icon" viewBox="0 0 24 24" stroke="var(--text-dark)" stroke-width="1.5" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                
+                <div class="widget-header">
+                    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                    Deben
+                </div>
+                
+                <div class="input-row">
+                    <span class="input-label">Came</span>
+                    <div class="input-box">
+                        <span>$</span><input type="number" inputmode="decimal" class="input-field" id="in-came" placeholder="0">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <span class="input-label">Mamá</span>
+                    <div class="input-box">
+                        <span>$</span><input type="number" inputmode="decimal" class="input-field" id="in-mama" placeholder="0">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <span class="input-label">Otro</span>
+                    <div class="input-box">
+                        <span>$</span><input type="number" inputmode="decimal" class="input-field" id="in-otro" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="widget-subtotal" id="subtotal-deben">$0</div>
+            </div>
+
+            <!-- Widget: En Mano -->
+            <div class="widget-col widget-mano">
+                <!-- Marca de agua vectorial -->
+                <svg class="watermark-icon" viewBox="0 0 24 24" stroke="var(--dark-green)" stroke-width="1.5" fill="none"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                
+                <div class="widget-header">
+                    <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect></svg>
+                    Mano
+                </div>
+
+                <div class="input-row">
+                    <span class="input-label">Tarjeta</span>
+                    <div class="input-box">
+                        <span>$</span><input type="number" inputmode="decimal" class="input-field" id="in-tarjeta" placeholder="0">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <span class="input-label">Cartera</span>
+                    <div class="input-box">
+                        <span>$</span><input type="number" inputmode="decimal" class="input-field" id="in-cartera" placeholder="0">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <span class="input-label">Moneda</span>
+                    <div class="input-box">
+                        <span>$</span><input type="number" inputmode="decimal" class="input-field" id="in-monedas" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="widget-subtotal" id="subtotal-mano">$0</div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Barra Inferior -->
+    <nav class="bottom-nav">
+        <a href="horario.html" class="nav-item">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        </a>
+        <a href="notas.html" class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        </a>
+        <a href="index.html" class="nav-item home-btn">
+            <svg viewBox="0 0 24 24" style="stroke: var(--text-dark);"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        </a>
+        <a href="track.html" class="nav-item">
+            <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+        </a>
+        <a href="meta.html" class="nav-item">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+        </a>
+    </nav>
+
+    <!-- MOTOR DE CÁLCULO Y PORCENTAJES -->
+    <script>
+        function formatCurrency(num) {
+            return '$' + num.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 2});
+        }
+
+        function updateFinances() {
+            const came = parseFloat(document.getElementById('in-came').value) || 0;
+            const mama = parseFloat(document.getElementById('in-mama').value) || 0;
+            const otro = parseFloat(document.getElementById('in-otro').value) || 0;
+
+            const tarjeta = parseFloat(document.getElementById('in-tarjeta').value) || 0;
+            const cartera = parseFloat(document.getElementById('in-cartera').value) || 0;
+            const monedas = parseFloat(document.getElementById('in-monedas').value) || 0;
+
+            const totalDeben = came + mama + otro;
+            const totalMano = tarjeta + cartera + monedas;
+            const grandTotal = totalDeben + totalMano;
+
+            // Actualizar Textos
+            document.getElementById('subtotal-deben').textContent = formatCurrency(totalDeben);
+            document.getElementById('subtotal-mano').textContent = formatCurrency(totalMano);
+            document.getElementById('grand-total').textContent = formatCurrency(grandTotal);
+
+            // Calcular y animar la barra de progreso
+            let pctDeben = 0;
+            let pctMano = 0;
+            if (grandTotal > 0) {
+                pctDeben = Math.round((totalDeben / grandTotal) * 100);
+                pctMano = 100 - pctDeben; // Para asegurar que sume 100 exactos
+            }
+
+            document.getElementById('bar-deben').style.width = pctDeben + '%';
+            document.getElementById('bar-mano').style.width = pctMano + '%';
+            document.getElementById('pct-deben').textContent = pctDeben;
+            document.getElementById('pct-mano').textContent = pctMano;
+
+            // Guardar en navegador
+            const finData = { came, mama, otro, tarjeta, cartera, monedas };
+            localStorage.setItem('myFinances', JSON.stringify(finData));
+        }
+
+        function loadFinances() {
+            const savedData = JSON.parse(localStorage.getItem('myFinances'));
+            if (savedData) {
+                if (savedData.came) document.getElementById('in-came').value = savedData.came;
+                if (savedData.mama) document.getElementById('in-mama').value = savedData.mama;
+                if (savedData.otro) document.getElementById('in-otro').value = savedData.otro;
+                
+                if (savedData.tarjeta) document.getElementById('in-tarjeta').value = savedData.tarjeta;
+                if (savedData.cartera) document.getElementById('in-cartera').value = savedData.cartera;
+                if (savedData.monedas) document.getElementById('in-monedas').value = savedData.monedas;
+            }
+            updateFinances();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFinances();
+            const inputs = document.querySelectorAll('.input-field');
+            inputs.forEach(input => {
+                input.addEventListener('input', updateFinances);
+            });
+        });
+    </script>
+</body>
+</html>

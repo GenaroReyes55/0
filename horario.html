@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Horarios">
+    <link rel="apple-touch-icon" href="icono.png">
+    <link rel="icon" type="image/png" href="icono.png">
+    
+    <title>Horarios - Mi Espacio</title>
+    <style>
+        :root {
+            /* Paleta de colores Retro Pop */
+            --bg-main: #dbe9d0c4;
+            --dark-green: #0C493D;
+            --lavender: #A18CEE;
+            --mint-green: #9CF6A8;
+            --peach-orange: #FA8E62;
+            --pale-yellow: #FDF1C2;
+            --pastel-pink: #FFB3C6;
+            --text-dark: #1A1C1A;
+            --text-light: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* --- Barra Superior --- */
+        .top-bar {
+            width: 100%;
+            background-color: transparent;
+            padding: calc(15px + env(safe-area-inset-top)) 20px 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .top-bar .page-title {
+            font-family: "Georgia", serif;
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--dark-green);
+        }
+
+        /* --- Contenedor Principal --- */
+        .container {
+            width: 100%;
+            max-width: 420px;
+            padding: 10px 20px calc(130px + env(safe-area-inset-bottom));
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- WIDGET BENTO: Estado en Vivo (MEJORADO) --- */
+        .live-status-bento {
+            background-color: var(--text-light);
+            border-radius: 32px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        /* Header del Dashboard Animado */
+        .live-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--dark-green);
+        }
+
+        .pulsing-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--mint-green);
+            border-radius: 50%;
+            border: 2px solid var(--dark-green);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(156, 246, 168, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(156, 246, 168, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(156, 246, 168, 0); }
+        }
+
+        .status-columns {
+            display: flex;
+            gap: 12px;
+        }
+
+        .status-col {
+            flex: 1;
+            border-radius: 20px;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-col.yo { background-color: var(--pale-yellow); }
+        .status-col.vanessa { background-color: var(--pastel-pink); }
+
+        .status-name {
+            font-family: "Georgia", serif;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+        }
+
+        .status-current {
+            background-color: var(--text-dark);
+            color: var(--mint-green);
+            font-weight: 800;
+            font-size: 0.8rem;
+            padding: 6px 14px;
+            border-radius: 16px;
+            text-transform: uppercase;
+            text-align: center;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .status-col.vanessa .status-current { color: var(--pastel-pink); }
+
+        .status-detail {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: rgba(26, 28, 26, 0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 4px;
+            width: 100%;
+        }
+
+        .status-detail span {
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+        }
+
+        /* --- Selector de Días --- */
+        .week-selector {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 8px;
+            border-radius: 24px;
+        }
+
+        .day-pill {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 60px;
+            border-radius: 18px;
+            color: rgba(26, 28, 26, 0.5);
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+            cursor: pointer;
+        }
+
+        .day-pill.active {
+            background-color: var(--text-dark);
+            color: var(--mint-green);
+            transform: scale(1.05);
+            box-shadow: 0px 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .day-pill span {
+            font-size: 0.7rem;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+
+        /* --- Estructura de Dos Columnas (Bento Cards) --- */
+        .schedules-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .schedule-column {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .column-title {
+            text-align: center;
+            font-family: "Georgia", serif;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--dark-green);
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        /* --- Tarjetas de Actividades (CON MARCAS DE AGUA) --- */
+        .task-card {
+            border-radius: 28px;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .task-card:active { transform: scale(0.96); }
+
+        .card-school { background-color: var(--lavender); color: var(--text-dark); }
+        .card-work-yo { background-color: var(--peach-orange); color: var(--text-dark); }
+        .card-work-vanessa { background-color: var(--pastel-pink); color: var(--text-dark); }
+        .card-free { background-color: var(--mint-green); color: var(--dark-green); }
+
+        /* Icono gigante de fondo translúcido */
+        .watermark {
+            position: absolute;
+            bottom: -15px;
+            right: -15px;
+            width: 100px;
+            height: 100px;
+            opacity: 0.15;
+            transform: rotate(-10deg);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .task-time-pill {
+            background-color: rgba(255, 255, 255, 0.4);
+            padding: 6px 10px;
+            border-radius: 12px;
+            font-family: "Georgia", serif;
+            font-weight: 800;
+            font-size: 0.8rem;
+            display: inline-block;
+            align-self: flex-start;
+            z-index: 1;
+        }
+
+        .task-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1;
+        }
+
+        .task-title {
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: -0.3px;
+        }
+
+        .task-icon {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* --- Barra Inferior Flotante (Dock) --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: calc(20px + env(safe-area-inset-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 30px);
+            max-width: 380px;
+            background-color: var(--text-light);
+            border: 3px solid var(--text-dark);
+            border-radius: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 15px;
+            box-shadow: 6px 6px 0px var(--text-dark);
+            z-index: 100;
+        }
+
+        .nav-item { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 16px; color: var(--text-dark); opacity: 0.5; text-decoration: none; transition: all 0.2s; }
+        .nav-item:active { opacity: 1; transform: scale(0.9); }
+        
+        .nav-item.home-btn {
+            width: 60px; height: 60px; border-radius: 50%; background-color: var(--peach-orange); color: var(--text-dark); opacity: 1; border: 3px solid var(--text-dark); box-shadow: 0px 4px 0px var(--text-dark); transform: translateY(-12px); flex-shrink: 0;
+        }
+        .nav-item.home-btn:active { transform: translateY(-8px); box-shadow: 0px 0px 0px var(--text-dark); }
+        .nav-item svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Barra Superior -->
+    <nav class="top-bar">
+        <div class="page-title">Horarios</div>
+    </nav>
+
+    <div class="container">
+
+        <!-- Widget Estado en Vivo con Diseño Premium -->
+        <div class="live-status-bento">
+            <div class="live-header">
+                <div class="pulsing-dot"></div>
+                Estado Actual
+            </div>
+
+            <div class="status-columns">
+                <div class="status-col yo">
+                    <div class="status-name">Yo</div>
+                    <div class="status-current" id="yo-status">Calculando...</div>
+                    <div class="status-detail">
+                        <div>Termina en:<br><span id="yo-time-end">--</span></div>
+                        <div style="margin-top: 4px;">Siguiente:<br><span id="yo-time-next">--</span></div>
+                    </div>
+                </div>
+                
+                <div class="status-col vanessa">
+                    <div class="status-name">Vanessa</div>
+                    <div class="status-current" id="van-status">Calculando...</div>
+                    <div class="status-detail">
+                        <div>Termina en:<br><span id="van-time-end">--</span></div>
+                        <div style="margin-top: 4px;">Siguiente:<br><span id="van-time-next">--</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Selector de Días -->
+        <div class="week-selector" id="week-selector">
+            <div class="day-pill" data-day="weekday"><span>L</span> 6</div>
+            <div class="day-pill active" data-day="weekday"><span>M</span> 7</div>
+            <div class="day-pill" data-day="weekday"><span>M</span> 8</div>
+            <div class="day-pill" data-day="weekday"><span>J</span> 9</div>
+            <div class="day-pill" data-day="weekday"><span>V</span> 10</div>
+            <div class="day-pill" data-day="saturday"><span>S</span> 11</div>
+        </div>
+
+        <!-- Columnas de Horarios -->
+        <div class="schedules-wrapper">
+            <div class="schedule-column" id="col-yo"></div>
+            <div class="schedule-column" id="col-vanessa"></div>
+        </div>
+
+    </div>
+
+    <!-- Barra Inferior -->
+    <nav class="bottom-nav">
+        <a href="dinero.html" class="nav-item"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></a>
+        <a href="notas.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></a>
+        <a href="index.html" class="nav-item home-btn"><svg viewBox="0 0 24 24" style="stroke: var(--text-dark);"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></a>
+        <a href="track.html" class="nav-item"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></a>
+        <a href="meta.html" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg></a>
+    </nav>
+
+    <script>
+        // Íconos SVG
+        const svgEscuela = `<svg class="task-icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`;
+        const svgTrabajo = `<svg class="task-icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`;
+        
+        // Marcas de Agua (Íconos gigantes translúcidos)
+        const watermarkEscuela = `<svg class="watermark" viewBox="0 0 24 24" stroke="var(--text-dark)" stroke-width="1" fill="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`;
+        const watermarkTrabajo = `<svg class="watermark" viewBox="0 0 24 24" stroke="var(--text-dark)" stroke-width="1" fill="none"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`;
+
+        const scheduleData = {
+            weekday: { 
+                yo: `
+                    <div class="column-title">Yo</div>
+                    <div class="task-card card-school">
+                        ${watermarkEscuela}
+                        <div class="task-time-pill">08:00 - 11:00 AM</div>
+                        <div class="task-header">
+                            ${svgEscuela}
+                            <div class="task-title">Escuela</div>
+                        </div>
+                    </div>
+                    <div class="task-card card-work-yo">
+                        ${watermarkTrabajo}
+                        <div class="task-time-pill">12:00 - 04:00 PM</div>
+                        <div class="task-header">
+                            ${svgTrabajo}
+                            <div class="task-title">Trabajo</div>
+                        </div>
+                    </div>
+                `,
+                vanessa: `
+                    <div class="column-title">Vanessa</div>
+                    <div class="task-card card-work-vanessa">
+                        ${watermarkTrabajo}
+                        <div class="task-time-pill">07:00 AM - 05:00 PM</div>
+                        <div class="task-header">
+                            ${svgTrabajo}
+                            <div class="task-title">Trabajo</div>
+                        </div>
+                    </div>
+                `
+            },
+            saturday: { 
+                yo: `
+                    <div class="column-title">Yo</div>
+                    <div class="task-card card-work-yo">
+                        ${watermarkTrabajo}
+                        <div class="task-time-pill">07:30 AM - 10:00 PM</div>
+                        <div class="task-header">
+                            ${svgTrabajo}
+                            <div class="task-title">Trabajo</div>
+                        </div>
+                    </div>
+                `,
+                vanessa: `
+                    <div class="column-title">Vanessa</div>
+                    <div class="task-card card-work-vanessa">
+                        ${watermarkTrabajo}
+                        <div class="task-time-pill">07:00 AM - 05:00 PM</div>
+                        <div class="task-header">
+                            ${svgTrabajo}
+                            <div class="task-title">Trabajo</div>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        const colYo = document.getElementById('col-yo');
+        const colVanessa = document.getElementById('col-vanessa');
+        const dayPills = document.querySelectorAll('.day-pill');
+
+        function updateSchedule(dayType) {
+            colYo.innerHTML = scheduleData[dayType].yo;
+            colVanessa.innerHTML = scheduleData[dayType].vanessa;
+        }
+
+        dayPills.forEach(pill => {
+            pill.addEventListener('click', () => {
+                dayPills.forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                updateSchedule(pill.getAttribute('data-day'));
+            });
+        });
+
+        updateSchedule('weekday');
+
+        function formatTimeDiff(diffHours) {
+            let totalMinutes = Math.round(diffHours * 60);
+            let h = Math.floor(totalMinutes / 60);
+            let m = totalMinutes % 60;
+            if (h > 0 && m > 0) return `${h}h ${m}m`;
+            if (h > 0 && m === 0) return `${h}h`;
+            return `${m} min`;
+        }
+
+        function updateLiveStatus() {
+            const now = new Date();
+            const day = now.getDay(); 
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const currentTime = hours + (minutes / 60);
+
+            const yoStatus = document.getElementById('yo-status');
+            const yoEnd = document.getElementById('yo-time-end');
+            const yoNext = document.getElementById('yo-time-next');
+            
+            const vanStatus = document.getElementById('van-status');
+            const vanEnd = document.getElementById('van-time-end');
+            const vanNext = document.getElementById('van-time-next');
+
+            if (day >= 1 && day <= 5) { 
+                if (currentTime < 8) {
+                    yoStatus.textContent = "Libre";
+                    yoEnd.textContent = "--";
+                    yoNext.textContent = formatTimeDiff(8 - currentTime) + " (Escuela)";
+                } else if (currentTime >= 8 && currentTime < 11) {
+                    yoStatus.textContent = "Escuela";
+                    yoEnd.textContent = formatTimeDiff(11 - currentTime);
+                    yoNext.textContent = formatTimeDiff(12 - currentTime) + " (Trabajo)";
+                } else if (currentTime >= 11 && currentTime < 12) {
+                    yoStatus.textContent = "Traslado";
+                    yoEnd.textContent = formatTimeDiff(12 - currentTime);
+                    yoNext.textContent = formatTimeDiff(12 - currentTime) + " (Trabajo)";
+                } else if (currentTime >= 12 && currentTime < 16) {
+                    yoStatus.textContent = "Trabajo";
+                    yoEnd.textContent = formatTimeDiff(16 - currentTime);
+                    yoNext.textContent = "Libre después";
+                } else {
+                    yoStatus.textContent = "Libre";
+                    yoEnd.textContent = "--";
+                    yoNext.textContent = "Hasta mañana";
+                }
+            } else if (day === 6) { 
+                if (currentTime < 7.5) {
+                    yoStatus.textContent = "Libre";
+                    yoEnd.textContent = "--";
+                    yoNext.textContent = formatTimeDiff(7.5 - currentTime) + " (Trabajo)";
+                } else if (currentTime >= 7.5 && currentTime < 22) {
+                    yoStatus.textContent = "Trabajo";
+                    yoEnd.textContent = formatTimeDiff(22 - currentTime);
+                    yoNext.textContent = "Libre después";
+                } else {
+                    yoStatus.textContent = "Libre";
+                    yoEnd.textContent = "--";
+                    yoNext.textContent = "Hasta el lunes";
+                }
+            } else { 
+                yoStatus.textContent = "Libre";
+                yoEnd.textContent = "--";
+                yoNext.textContent = "--";
+            }
+
+            if (day >= 1 && day <= 6) { 
+                if (currentTime < 7) {
+                    vanStatus.textContent = "Libre";
+                    vanEnd.textContent = "--";
+                    vanNext.textContent = formatTimeDiff(7 - currentTime) + " (Trabajo)";
+                } else if (currentTime >= 7 && currentTime < 17) {
+                    vanStatus.textContent = "Trabajo";
+                    vanEnd.textContent = formatTimeDiff(17 - currentTime);
+                    vanNext.textContent = "Libre después";
+                } else {
+                    vanStatus.textContent = "Libre";
+                    vanEnd.textContent = "--";
+                    vanNext.textContent = "Hasta mañana";
+                }
+            } else { 
+                vanStatus.textContent = "Libre";
+                vanEnd.textContent = "--";
+                vanNext.textContent = "--";
+            }
+        }
+
+        updateLiveStatus();
+        setInterval(updateLiveStatus, 60000);
+
+    </script>
+</body>
+</html>

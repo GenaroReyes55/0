@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Proyecciones">
+    <link rel="apple-touch-icon" href="icono.png">
+    <link rel="icon" type="image/png" href="icono.png">
+    
+    <title>Proyecciones - Mi Espacio</title>
+    <style>
+        :root {
+            /* Paleta Bento Premium */
+            --bg-main: #dbe9d0c4;
+            --dark-green: #0C493D;
+            --mint-green: #9CF6A8;
+            --peach-orange: #FA8E62;
+            --lavender: #A18CEE;
+            --pale-yellow: #FDF1C2;
+            --pastel-pink: #FFB3C6;
+            --text-dark: #1A1C1A;
+            --text-light: #FFFFFF;
+            
+            /* Colores de UI */
+            --income: #2E7D32;
+            --expense: #C62828;
+            --modal-overlay: rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px 20px calc(130px + env(safe-area-inset-bottom));
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- PROGRESO GIGANTE --- */
+        .progress-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 25px;
+            margin-top: 10px;
+        }
+
+        .progress-percent {
+            font-size: 5rem;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -2px;
+            color: var(--dark-green);
+        }
+
+        .progress-bar-container {
+            width: 80%;
+            height: 12px;
+            background-color: rgba(26, 28, 26, 0.1);
+            border-radius: 10px;
+            margin: 15px 0 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--lavender);
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+
+        .progress-subtitle {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: rgba(26, 28, 26, 0.6);
+        }
+
+        /* --- DASHBOARD PRINCIPAL --- */
+        .dashboard-card {
+            background-color: var(--dark-green);
+            border-radius: 28px;
+            padding: 25px 20px;
+            color: var(--text-light);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(12, 73, 61, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .dash-bg-circle {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 15px solid rgba(255, 255, 255, 0.05);
+            pointer-events: none;
+        }
+
+        .dash-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dash-block .label {
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.7;
+            margin-bottom: 4px;
+        }
+
+        .dash-block .amount {
+            font-family: "Georgia", serif;
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .dash-block.right { text-align: right; }
+        
+        .dash-block.right .amount-edit {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .dash-block.right .amount-edit:active { transform: scale(0.95); }
+        .dash-block.right .amount-edit svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5;}
+
+        .dash-divider {
+            width: 100%;
+            height: 2px;
+            border-bottom: 2px dashed rgba(255, 255, 255, 0.2);
+            margin-bottom: 15px;
+        }
+
+        .dash-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dash-bottom .label { font-size: 0.8rem; font-weight: 800; opacity: 0.8; }
+        .dash-bottom .amount { font-family: "Georgia", serif; font-size: 1.5rem; font-weight: 800; }
+
+        /* --- BOTONES DE ACCIÓN --- */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 16px 0;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: none;
+        }
+
+        .btn-action:active { transform: scale(0.96); }
+        .btn-action svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.5; fill: none; }
+
+        .btn-adjust { background-color: var(--text-light); color: var(--text-dark); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .btn-new { background-color: var(--lavender); color: var(--text-dark); box-shadow: 0 4px 10px rgba(161, 140, 238, 0.3); }
+
+        /* --- LISTA DE PLANES --- */
+        .month-group { margin-bottom: 25px; }
+
+        .month-header {
+            font-size: 0.85rem;
+            font-weight: 900;
+            color: var(--dark-green);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding-left: 5px;
+        }
+
+        .plan-card {
+            background-color: var(--text-light);
+            border-radius: 24px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            transition: opacity 0.3s;
+        }
+
+        .plan-card.completed { opacity: 0.6; }
+
+        .plan-date-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            color: var(--text-dark);
+        }
+        .plan-date-col .d { font-size: 1.1rem; font-weight: 900; line-height: 1; }
+        .plan-date-col .m { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; opacity: 0.6; margin-top: 2px;}
+
+        /* Ícono Sólido de la Tarjeta */
+        .plan-icon {
+            width: 45px;
+            height: 45px;
+            background-color: rgba(26, 28, 26, 0.05);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .plan-icon svg { 
+            width: 22px; 
+            height: 22px; 
+            fill: var(--text-dark); 
+            stroke: none; 
+        }
+
+        .plan-details { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+        
+        .plan-name-row { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+        .plan-name { font-size: 0.95rem; font-weight: 800; color: var(--text-dark); text-overflow: ellipsis; overflow: hidden;}
+        
+        .tag-pos {
+            background-color: var(--pale-yellow);
+            color: var(--text-dark);
+            font-size: 0.6rem;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 8px;
+            text-transform: uppercase;
+        }
+
+        .plan-amount {
+            font-family: "Georgia", serif;
+            font-size: 1.05rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        .amt-in { color: var(--income); }
+        .amt-out { color: var(--expense); }
+
+        .plan-check {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid rgba(26, 28, 26, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .plan-card.completed .plan-check { background-color: var(--lavender); border-color: var(--lavender); }
+        .plan-check svg { width: 14px; height: 14px; stroke: var(--text-dark); stroke-width: 3; fill: none; opacity: 0; transition: opacity 0.2s; }
+        .plan-card.completed .plan-check svg { opacity: 1; }
+
+        .btn-delete-plan {
+            width: 28px; height: 28px; border-radius: 50%; background-color: rgba(26, 28, 26, 0.05); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+        }
+        .btn-delete-plan svg { width: 12px; height: 12px; stroke: var(--text-dark); stroke-width: 3; fill: none; }
+
+        /* --- MODALES NATIVOS --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--modal-overlay); backdrop-filter: blur(5px);
+            z-index: 200; display: none; align-items: flex-end; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+
+        .modal-content {
+            background-color: var(--bg-main);
+            width: 100%; max-width: 420px;
+            border-radius: 32px 32px 0 0;
+            padding: 25px 20px 40px;
+            display: flex; flex-direction: column; gap: 15px;
+            animation: slideUp 0.3s ease-out forwards;
+        }
+
+        .modal-overlay.centered { align-items: center; }
+        .modal-alert {
+            background-color: var(--text-light);
+            width: 90%; max-width: 320px;
+            border-radius: 32px;
+            padding: 25px 20px;
+            display: flex; flex-direction: column; gap: 15px;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            box-shadow: 0px 10px 30px rgba(0,0,0,0.1);
+        }
+
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .modal-title { font-size: 1.2rem; font-weight: 900; color: var(--dark-green); margin-bottom: 5px;}
+        .modal-alert .modal-title { text-align: center; margin-bottom: 0; }
+
+        .modal-tabs { display: flex; background: rgba(26,28,26,0.05); border-radius: 20px; padding: 4px; gap: 4px;}
+        .m-tab { flex: 1; padding: 12px 0; text-align: center; font-size: 0.9rem; font-weight: 800; border-radius: 16px; cursor: pointer; color: rgba(26,28,26,0.5); transition: all 0.2s; }
+        .m-tab.active[data-val="in"] { background: var(--mint-green); color: var(--dark-green); }
+        .m-tab.active[data-val="out"] { background: var(--pastel-pink); color: var(--text-dark); }
+
+        /* Cuadrícula de iconos SÓLIDOS con Scroll */
+        .icon-grid {
+            display: grid; 
+            grid-template-columns: repeat(6, 1fr); 
+            gap: 8px;
+            background: rgba(255,255,255,0.4); 
+            padding: 12px; 
+            border-radius: 24px;
+            max-height: 220px; 
+            overflow-y: auto; 
+            scrollbar-width: none; 
+        }
+        .icon-grid::-webkit-scrollbar { display: none; } 
+
+        .i-opt {
+            aspect-ratio: 1; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; color: rgba(26,28,26,0.5);
+        }
+        .i-opt.active { background: var(--lavender); color: var(--text-dark); transform: scale(1.1); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        
+        .i-opt svg { 
+            width: 22px; 
+            height: 22px; 
+            fill: currentColor; 
+            stroke: none; 
+        }
+
+        .m-input {
+            background: rgba(255,255,255,0.6); border: none; border-radius: 18px;
+            padding: 16px; font-family: -apple-system, sans-serif; font-size: 1rem;
+            font-weight: 700; color: var(--text-dark); outline: none; width: 100%;
+        }
+        .m-input::placeholder { color: rgba(26,28,26,0.4); }
+
+        .m-check-row { display: flex; align-items: center; gap: 10px; margin: 5px 0 10px; cursor: pointer; }
+        .m-box { width: 22px; height: 22px; border: 2px solid rgba(26,28,26,0.4); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+        .m-check-row input:checked + .m-box { background: var(--peach-orange); border-color: var(--peach-orange); }
+        .m-box svg { width: 14px; height: 14px; stroke: #fff; stroke-width: 3; fill: none; opacity: 0; }
+        .m-check-row input:checked + .m-box svg { opacity: 1; }
+        .m-check-row span { font-size: 0.9rem; font-weight: 800; color: var(--text-dark); }
+        .m-check-row input { display: none; }
+
+        .m-btn { padding: 16px; border-radius: 20px; font-size: 1rem; font-weight: 800; cursor: pointer; text-align: center; border: none; }
+        .btn-save-plan { background: var(--lavender); color: var(--text-dark); margin-bottom: 8px;}
+        .btn-save-alert { background: var(--dark-green); color: var(--mint-green); }
+        .btn-cancel { background: transparent; color: var(--expense); }
+
+        /* --- Barra Inferior --- */
+        .bottom-nav { position: fixed; bottom: calc(20px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: calc(100% - 30px); max-width: 380px; background-color: var(--text-light); border: 3px solid var(--text-dark); border-radius: 40px; display: flex; justify-content: space-between; align-items: center; padding: 6px 15px; box-shadow: 6px 6px 0px var(--text-dark); z-index: 100; }
+        .nav-item { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 16px; color: var(--text-dark); opacity: 0.5; text-decoration: none; transition: all 0.2s; }
+        .nav-item:active { opacity: 1; transform: scale(0.9); }
+        .nav-item.home-btn { width: 60px; height: 60px; border-radius: 50%; background-color: var(--peach-orange); color: var(--text-dark); opacity: 1; border: 3px solid var(--text-dark); box-shadow: 0px 4px 0px var(--text-dark); transform: translateY(-12px); flex-shrink: 0; }
+        .nav-item.home-btn:active { transform: translateY(-8px); box-shadow: 0px 0px 0px var(--text-dark); }
+        .nav-item svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="progress-header">
+            <div class="progress-percent" id="lblPercent">0%</div>
+            <div class="progress-bar-container">
+                <div class="progress-fill" id="barFill" style="width: 0%;"></div>
+            </div>
+            <div class="progress-subtitle">Avance hacia tu objetivo</div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dash-bg-circle"></div>
+            
+            <div class="dash-top">
+                <div class="dash-block">
+                    <div class="label">Saldo Real</div>
+                    <div class="amount" id="lblReal">$0.00</div>
+                </div>
+                <div class="dash-block right">
+                    <div class="label">Meta Global</div>
+                    <div class="amount-edit" onclick="openEditModal('target')">
+                        <span id="lblTarget">$5,000.00</span>
+                        <svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dash-divider"></div>
+
+            <div class="dash-bottom">
+                <div class="label">Proyección Final</div>
+                <div class="amount" id="lblProj">$0.00</div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-action btn-adjust" onclick="openEditModal('base')">
+                <svg viewBox="0 0 24 24"><path d="M3 12h18"></path><path d="M12 3v18"></path><path d="M8 8l-4 4 4 4"></path><path d="M16 8l4 4-4 4"></path></svg>
+                Ajustar Base
+            </button>
+            <button class="btn-action btn-new" onclick="openPlanModal()">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Nuevo Plan
+            </button>
+        </div>
+
+        <div id="plansList"></div>
+
+    </div>
+
+    <div class="modal-overlay" id="planModalOverlay">
+        <div class="modal-content">
+            <div class="modal-title">Añadir Plan</div>
+            
+            <div class="modal-tabs">
+                <div class="m-tab active" data-val="in" onclick="setModalType('in')">+ Ingreso</div>
+                <div class="m-tab" data-val="out" onclick="setModalType('out')">- Gasto</div>
+            </div>
+
+            <div class="icon-grid" id="iconGridContainer">
+                </div>
+
+            <input type="text" id="mDesc" class="m-input" placeholder="Descripción (Ej: Netflix, Gasolina)">
+            <input type="number" id="mAmt" class="m-input" placeholder="Monto (Ej: 200)" inputmode="decimal">
+            <input type="date" id="mDate" class="m-input" style="color: rgba(26,28,26,0.6);">
+            
+            <label class="m-check-row">
+                <input type="checkbox" id="mPos">
+                <div class="m-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+                <span>Es solo una posibilidad (No seguro)</span>
+            </label>
+
+            <button class="m-btn btn-save-plan" onclick="savePlan()">Guardar Plan</button>
+            <button class="m-btn btn-cancel" onclick="closeModals()">Cancelar</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay centered" id="editModalOverlay">
+        <div class="modal-alert">
+            <div class="modal-title" id="editModalTitle">Editar Monto</div>
+            <input type="number" id="editAmountInput" class="m-input" placeholder="0.00" inputmode="decimal" style="text-align: center; font-size: 1.5rem;">
+            <button class="m-btn btn-save-alert" onclick="saveEditAmount()">Guardar Cambios</button>
+            <button class="m-btn btn-cancel" style="padding: 0; margin-top: -5px;" onclick="closeModals()">Cancelar</button>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="dinero.html" class="nav-item"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></a>
+        <a href="notas.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></a>
+        <a href="index.html" class="nav-item home-btn"><svg viewBox="0 0 24 24" style="stroke: var(--text-dark);"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></a>
+        <a href="track.html" class="nav-item"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></a>
+        <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></a>
+    </nav>
+
+    <script>
+        // Catálogo de 42 Íconos Sólidos Premium
+        const svgs = {
+            star: '<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>',
+            card: '<svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 5H4V6h16v3z"/></svg>', // Tarjeta
+            bill: '<svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/></svg>', // Billete
+            spotify: '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.59 14.42c-.18.29-.56.39-.86.21-2.35-1.43-5.3-1.76-8.79-.96-.33.08-.67-.13-.75-.47-.08-.33.13-.67.47-.75 3.81-.87 7.08-.5 9.71 1.12.3.18.39.56.22.85zm1.2-3.21c-.23.37-.7.48-1.07.25-2.71-1.67-6.88-2.15-9.93-1.18-.41.13-.85-.11-.97-.52-.13-.41.11-.85.52-.97 3.49-1.11 8.09-.57 11.2 1.34.37.23.48.7.25 1.08zm.12-3.34c-3.23-1.92-8.13-2.12-11.61-1.07-.49.15-1.02-.13-1.17-.62-.15-.49.13-1.02.62-1.17 4.02-1.22 9.68-.98 13.34 1.26.44.27.58.84.31 1.28-.27.44-.85.58-1.29.31z"/></svg>',
+            mercado_libre: '<svg viewBox="0 0 24 24"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm0 10c-2.76 0-5-2.24-5-5h2c0 1.66 1.34 3 3 3s3-1.34 3-3h2c0 2.76-2.24 5-5 5z"/></svg>',
+            transfer: '<svg viewBox="0 0 24 24"><path d="M21 11l-4-4v3H3v2h14v3l4-4zM3 17l4 4v-3h14v-2H7v-3l-4 4z"/></svg>',
+            job: '<svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4z"/></svg>',
+            user: '<svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>',
+            coins: '<svg viewBox="0 0 24 24"><path d="M12 12c-3.86 0-7-1.34-7-3s3.14-3 7-3 7 1.34 7 3-3.14 3-7 3zm0 2c-3.86 0-7-1.34-7-3v2c0 1.66 3.14 3 7 3s7-1.34 7-3v-2c0 1.66-3.14 3-7 3zm0 4c-3.86 0-7-1.34-7-3v2c0 1.66 3.14 3 7 3s7-1.34 7-3v-2c0 1.66-3.14 3-7 3z"/></svg>',
+            bus: '<svg viewBox="0 0 24 24"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 2C6.67 18 6 17.33 6 16.5S6.67 15 7.5 15s1.5.67 1.5 1.5S8.33 18 7.5 18zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v8z"/></svg>',
+            bonus: '<svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 8a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm-3.5 2.5a5.98 5.98 0 0 1 7 0L17 22l-5-2.5L7 22l1.5-9.5z"/></svg>',
+            store: '<svg viewBox="0 0 24 24"><path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/></svg>',
+            heart: '<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>',
+            tv: '<svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-11 11V6l7 4-7 4z"/></svg>',
+            motorcycle: '<svg viewBox="0 0 24 24"><path d="M19.44 9.03L15.41 5H11v2h3.59l2.2 2.2C14.79 9.93 13.5 11.36 13.12 13H5.82C5.4 11.84 4.3 11 3 11c-1.66 0-3 1.34-3 3s1.34 3 3 3c1.3 0 2.4-.84 2.82-2h5.27c-.06.32-.09.65-.09 1 0 2.76 2.24 5 5 5s5-2.24 5-5c0-1.78-.93-3.33-2.34-4.22l1.78-2.75zM3 15c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm13 4c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3z"/></svg>',
+            train: '<svg viewBox="0 0 24 24"><path d="M12 2c-4 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h12v-.5L16.5 19c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-4-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-7H6V6h5v4zm4 0V6h5v4h-5zm1.5 7c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>',
+            helmet: '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12v6h20v-6c0-5.52-4.48-10-10-10zm0 3c2.21 0 4 1.79 4 4H8c0-2.21 1.79-4 4-4zm6 11H6v-3h12v3z"/></svg>',
+            headphones: '<svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9v7c0 1.1.9 2 2 2h4v-8H5v-1c0-3.87 3.13-7 7-7s7 3.13 7 7v1h-4v8h4c1.1 0 2-.9 2-2v-7c0-4.97-4.03-9-9-9z"/></svg>',
+            laptop: '<svg viewBox="0 0 24 24"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4z"/></svg>',
+            printer: '<svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-2-9H7v3h10V3z"/></svg>',
+            school: '<svg viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3z"/></svg>',
+            tools: '<svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.5 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.4-2.4c.4-.4.4-1 0-1.4z"/></svg>',
+            gas: '<svg viewBox="0 0 24 24"><path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11C16.17 7 15.5 8.16 15.5 9.4c0 2.01 1.34 3.73 3.19 4.31L17.5 19H16V7c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v14h14v-5.5h1c1.38 0 2.5-1.12 2.5-2.5V9.4c0-.85-.39-1.63-1.02-2.14l.29-.03zM12 12H6V7h6v5z"/></svg>',
+            pizza: '<svg viewBox="0 0 24 24"><path d="M12 2C8.43 2 5.23 3.54 3.01 6L12 22l8.99-16C18.78 3.55 15.57 2 12 2zM7 7c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm5 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>',
+            coffee: '<svg viewBox="0 0 24 24"><path d="M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 5h-2V5h2v3zM4 19h16v2H4z"/></svg>',
+            drink: '<svg viewBox="0 0 24 24"><path d="M21 5V3H3v2l8 9v5H6v2h12v-2h-5v-5l8-9zM7.43 7L5.66 5h12.69l-1.78 2H7.43z"/></svg>',
+            cart: '<svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0 0 20 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>',
+            shirt: '<svg viewBox="0 0 24 24"><path d="M21.99 8c0-.72-.37-1.35-.94-1.7L12 1 2.95 6.3C2.38 6.65 2 7.28 2 8l2 2v9c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2v-9l2-2z"/></svg>',
+            paw: '<svg viewBox="0 0 24 24"><path d="M14.5 5.5c0-1.38-1.12-2.5-2.5-2.5S9.5 4.12 9.5 5.5 10.62 8 12 8s2.5-1.12 2.5-2.5zM6 8.5C6 7.12 4.88 6 3.5 6S1 7.12 1 8.5 2.12 11 3.5 11 6 9.88 6 8.5zm14.5-2.5c-1.38 0-2.5 1.12-2.5 2.5s1.12 2.5 2.5 2.5 2.5-1.12 2.5-2.5-1.12-2.5-2.5-2.5zm-3 5.5c-1.1 0-2.08.38-2.88 1.02-.63-.33-1.34-.52-2.12-.52-.78 0-1.49.19-2.12.52C9.58 11.88 8.6 11.5 7.5 11.5c-1.93 0-3.5 1.57-3.5 3.5 0 2.25 1.75 4 4 4h8c2.25 0 4-1.75 4-4 0-1.93-1.57-3.5-3.5-3.5z"/></svg>',
+            medical: '<svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM15 14h-2v2h-2v-2H9v-2h2v-2h2v2h2v2z"/></svg>',
+            gym: '<svg viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/></svg>',
+            plane: '<svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>',
+            home: '<svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>',
+            water: '<svg viewBox="0 0 24 24"><path d="M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 3.8 8.2 8 8.2s8-3.22 8-8.2c0-3.32-2.67-7.25-8-11.8z"/></svg>',
+            zap: '<svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>',
+            phone: '<svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM12 21c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm5-3H7V4h10v14z"/></svg>',
+            wifi: '<svg viewBox="0 0 24 24"><path d="M1 9l2 2c5-5 13-5 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.2 4.2 0 0 0-6 0zm-4-4l2 2a7.07 7.07 0 0 1 10 0l2-2a9.9 9.9 0 0 0-14 0z"/></svg>',
+            gift: '<svg viewBox="0 0 24 24"><path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1h-4c0-.55.45-1 1-1s.45-1 1-1zm-6 0c.55 0 1 .45 1 1s-.45 1-1 1H8c0-.55.45-1 1-1s.45-1 1-1zm10 15H5v-2h14v2zm0-5H5V8h14v6z"/></svg>',
+            camera: '<svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.65 0-3 1.35-3 3s1.35 3 3 3 3-1.35 3-3-1.35-3-3-3z"/></svg>',
+            gamepad: '<svg viewBox="0 0 24 24"><path d="M21.58 16.09l-1.09-7.66C20.18 6.27 18.4 5 16 5H8C5.6 5 3.82 6.27 3.51 8.43l-1.09 7.66C2.2 17.63 3.39 19 4.94 19c.68 0 1.32-.27 1.8-.75L9 16h6l2.25 2.25c.48.48 1.13.75 1.8.75 1.56 0 2.75-1.38 2.53-2.91zM11 11H9v2H8v-2H6v-1h2V8h1v2h2v1zm4-1c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm2 3c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg>',
+            movie: '<svg viewBox="0 0 24 24"><path d="M22 10V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v4c1.1 0 2 .9 2 2s-.9 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.9-2-2s.9-2 2-2zm-12 7H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V7h2v2zm6 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V7h2v2z"/></svg>',
+            book: '<svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>',
+            scissors: '<svg viewBox="0 0 24 24"><path d="M9.64 7.64c.23-.5.36-1.05.36-1.64 0-2.21-1.79-4-4-4S2 3.79 2 6s1.79 4 4 4c.59 0 1.14-.13 1.64-.36L10 12l-2.36 2.36C7.14 14.13 6.59 14 6 14c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4c0-.59-.13-1.14-.36-1.64L12 14l7 7h3v-1L9.64 7.64zM6 8c-1.1 0-2-.89-2-2s.9-2 2-2 2 .89 2 2-.9 2-2 2zm0 12c-1.1 0-2-.89-2-2s.9-2 2-2 2 .89 2 2-.9 2-2 2zm6-7.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5.5.22.5.5-.22.5-.5.5zM19 3l-6 6 2 2 7-7V3z"/></svg>'
+        };
+
+        // Estado Global
+        let state = JSON.parse(localStorage.getItem('myPlansState')) || {
+            baseBalance: 0,
+            target: 5000,
+            plans: []
+        };
+
+        let modalType = 'in';
+        let modalIcon = 'star';
+        let editMode = ''; 
+
+        // Rellenar Grid de Íconos
+        function populateIcons() {
+            const grid = document.getElementById('iconGridContainer');
+            grid.innerHTML = '';
+            for (let key in svgs) {
+                const activeClass = key === 'star' ? 'active' : '';
+                grid.innerHTML += `<div class="i-opt ${activeClass}" data-icon="${key}" onclick="setModalIcon('${key}')">${svgs[key]}</div>`;
+            }
+        }
+
+        // Utilidades de formato
+        const fmtMoney = num => '$' + parseFloat(num).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+        
+        const getMonthYear = dateStr => {
+            const d = new Date(dateStr + "T12:00:00");
+            const meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
+            return `${meses[d.getMonth()]} ${d.getFullYear()}`;
+        };
+        const getDay = dateStr => new Date(dateStr + "T12:00:00").getDate();
+        const getShortMonth = dateStr => {
+            const meses = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
+            return meses[new Date(dateStr + "T12:00:00").getMonth()];
+        };
+
+        function render() {
+            let saldoReal = state.baseBalance;
+            let projFinal = state.baseBalance;
+
+            state.plans.sort((a, b) => new Date(a.date) - new Date(b.date));
+            const listEl = document.getElementById('plansList');
+            listEl.innerHTML = '';
+            let currentGroup = '';
+
+            state.plans.forEach((p) => {
+                const amtVal = p.type === 'in' ? p.amount : -p.amount;
+                
+                if (p.completed) saldoReal += amtVal;
+                projFinal += amtVal;
+
+                const groupName = getMonthYear(p.date);
+                if (groupName !== currentGroup) {
+                    currentGroup = groupName;
+                    listEl.innerHTML += `<div class="month-header">${currentGroup}</div>`;
+                }
+
+                const amtClass = p.type === 'in' ? 'amt-in' : 'amt-out';
+                const sign = p.type === 'in' ? '+' : '-';
+                const posTag = p.possible ? `<span class="tag-pos">Posible</span>` : '';
+                const compClass = p.completed ? 'completed' : '';
+                
+                listEl.innerHTML += `
+                    <div class="plan-card ${compClass}">
+                        <div class="plan-date-col">
+                            <span class="d">${getDay(p.date)}</span>
+                            <span class="m">${getShortMonth(p.date)}</span>
+                        </div>
+                        <div class="plan-icon">${svgs[p.icon] || svgs.star}</div>
+                        <div class="plan-details">
+                            <div class="plan-name-row">
+                                <span class="plan-name">${p.desc}</span>
+                                ${posTag}
+                            </div>
+                        </div>
+                        <div class="plan-amount ${amtClass}">${sign}${fmtMoney(p.amount)}</div>
+                        <div class="plan-check" onclick="toggleCheck(${p.id})">
+                            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                        <div class="btn-delete-plan" onclick="deletePlan(${p.id})">
+                            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('lblReal').textContent = fmtMoney(saldoReal);
+            document.getElementById('lblTarget').textContent = fmtMoney(state.target);
+            document.getElementById('lblProj').textContent = fmtMoney(projFinal);
+
+            let pct = state.target > 0 ? Math.round((saldoReal / state.target) * 100) : 0;
+            if(pct < 0) pct = 0;
+            if(pct > 100) pct = 100;
+
+            document.getElementById('lblPercent').textContent = pct + '%';
+            document.getElementById('barFill').style.width = pct + '%';
+
+            localStorage.setItem('myPlansState', JSON.stringify(state));
+        }
+
+        function toggleCheck(id) {
+            const plan = state.plans.find(p => p.id === id);
+            if (plan) {
+                plan.completed = !plan.completed;
+                render();
+            }
+        }
+
+        function deletePlan(id) {
+            state.plans = state.plans.filter(p => p.id !== id);
+            render();
+        }
+
+        // Modales
+        function openEditModal(mode) {
+            editMode = mode;
+            const title = mode === 'base' ? 'Ajustar Saldo Real' : 'Editar Meta Global';
+            const currentVal = mode === 'base' ? state.baseBalance : state.target;
+            
+            document.getElementById('editModalTitle').textContent = title;
+            document.getElementById('editAmountInput').value = currentVal;
+            document.getElementById('editModalOverlay').classList.add('active');
+            
+            setTimeout(() => document.getElementById('editAmountInput').focus(), 100);
+        }
+
+        function saveEditAmount() {
+            const inputVal = parseFloat(document.getElementById('editAmountInput').value);
+            if (!isNaN(inputVal)) {
+                if (editMode === 'base') state.baseBalance = inputVal;
+                if (editMode === 'target') state.target = inputVal;
+                render();
+            }
+            closeModals();
+        }
+
+        function openPlanModal() {
+            document.getElementById('planModalOverlay').classList.add('active');
+            document.getElementById('mDate').valueAsDate = new Date();
+        }
+
+        function closeModals() {
+            document.getElementById('planModalOverlay').classList.remove('active');
+            document.getElementById('editModalOverlay').classList.remove('active');
+            
+            document.getElementById('mDesc').value = '';
+            document.getElementById('mAmt').value = '';
+            document.getElementById('mPos').checked = false;
+        }
+
+        function setModalType(type) {
+            modalType = type;
+            document.querySelectorAll('.m-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.m-tab[data-val="${type}"]`).classList.add('active');
+        }
+
+        function setModalIcon(icon) {
+            modalIcon = icon;
+            document.querySelectorAll('.i-opt').forEach(i => i.classList.remove('active'));
+            document.querySelector(`.i-opt[data-icon="${icon}"]`).classList.add('active');
+        }
+
+        function savePlan() {
+            const desc = document.getElementById('mDesc').value.trim();
+            const amt = parseFloat(document.getElementById('mAmt').value);
+            const date = document.getElementById('mDate').value;
+            const pos = document.getElementById('mPos').checked;
+
+            if (!desc || isNaN(amt) || !date) {
+                alert("Completa descripción, monto y fecha.");
+                return;
+            }
+
+            state.plans.push({
+                id: Date.now(),
+                type: modalType,
+                icon: modalIcon,
+                desc: desc,
+                amount: amt,
+                date: date,
+                possible: pos,
+                completed: false
+            });
+
+            closeModals();
+            render();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            populateIcons();
+            render();
+        });
+    </script>
+</body>
+</html>
