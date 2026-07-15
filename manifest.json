@@ -1,0 +1,17 @@
+{
+  "name": "Mi Espacio Personal",
+  "short_name": "Mi Espacio",
+  "description": "Mi panel de control personal de finanzas y horarios",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#dbe9d0",
+  "theme_color": "#0C493D",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icono.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Track">
     <link rel="apple-touch-icon" href="icono.png">
     <link rel="icon" type="image/png" href="icono.png">
+    <link rel="manifest" href="manifest.json">
     
     <title>Track Anual - Mi Espacio</title>
     <style>
@@ -45,7 +46,7 @@
         .top-bar {
             width: 100%;
             background-color: transparent;
-            padding: calc(15px + env(safe-area-inset-top)) 20px 15px;
+            padding: calc(20px + env(safe-area-inset-top)) 20px 15px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -277,7 +278,6 @@
 
     <div class="container">
 
-        <!-- DASHBOARD -->
         <div class="stats-bento">
             <div class="stats-header">Total de Días Marcados</div>
             <div class="total-days" id="count-total">0</div>
@@ -298,7 +298,6 @@
             </div>
         </div>
 
-        <!-- HERRAMIENTAS (Pinceles) -->
         <div class="toolbar">
             <div class="tool-btn tool-tux active" onclick="setTool('tux')">
                 <div class="tool-indicator"></div>
@@ -318,14 +317,11 @@
             </div>
         </div>
 
-        <!-- CALENDARIO -->
         <div class="calendar-wrapper" id="calendar">
-            <!-- Se inyecta por JS -->
-        </div>
+            </div>
 
     </div>
 
-    <!-- Barra Inferior (Oculta Track, Muestra Notas) -->
     <nav class="bottom-nav">
         <a href="dinero.html" class="nav-item"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></a>
         <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></a>
@@ -334,7 +330,6 @@
         <a href="meta.html" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg></a>
     </nav>
 
-    <!-- SCRIPTS -->
     <script>
         const year = new Date().getFullYear(); // Año actual (Ej. 2026)
         const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -448,6 +443,15 @@
             renderCalendar();
             updateStats();
         });
+
+        // --- REGISTRO DEL SERVICE WORKER (SOPORTE OFFLINE) ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker cargado con éxito para offline', reg))
+                    .catch(err => console.log('Error al registrar Service Worker', err));
+            });
+        }
     </script>
 </body>
 </html>

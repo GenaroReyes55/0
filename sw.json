@@ -1,0 +1,54 @@
+const CACHE_NAME = 'mi-espacio-cache-v1';
+const ASSETS = [
+  'index.html',
+  'dinero.html',
+  'horario.html',
+  'meta.html',
+  'notas.html',
+  'track.html',
+  'icono.png',
+  'manifest.json'
+];
+
+// Instalar y guardar archivos en caché
+self.addEventListener('install', (e) => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS);
+    }).then(() => self.skipWaiting())
+  );
+});
+
+// Activar y limpiar cachés antiguos
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
+});
+
+// Estrategia: Buscar primero en red, si falla usar caché (Network First)
+self.addEventListener('fetch', (e) => {
+  e.respondWith(
+    fetch(e.request).then((response) => {
+      // Si la respuesta es válida, clonar y guardar en caché
+      if (response && response.status === 200 && e.request.method === 'GET') {
+        const responseClone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(e.request, responseClone);
+        });
+      }
+      return response;
+    }).catch(() => {
+      // Si no hay internet, retornar del caché
+      return caches.match(e.request);
+    })
+  );
+});

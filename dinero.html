@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Dinero">
     <link rel="apple-touch-icon" href="icono.png">
     <link rel="icon" type="image/png" href="icono.png">
+    <link rel="manifest" href="manifest.json">
     
     <title>Dinero - Mi Espacio</title>
     <style>
@@ -46,7 +47,7 @@
         .top-bar {
             width: 100%;
             background-color: transparent;
-            padding: calc(15px + env(safe-area-inset-top)) 20px 15px;
+            padding: calc(20px + env(safe-area-inset-top)) 20px 15px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -129,13 +130,13 @@
 
         .progress-fill-deben {
             height: 100%;
-            background-color: var(--pastel-pink); /* Rojo/Rosa pastel */
+            background-color: var(--pastel-pink); 
             transition: width 0.5s ease-in-out;
         }
 
         .progress-fill-mano {
             height: 100%;
-            background-color: var(--dark-green); /* Verde */
+            background-color: var(--dark-green); 
             transition: width 0.5s ease-in-out;
         }
 
@@ -204,12 +205,12 @@
         /* Campos de Entrada en forma de Píldora */
         .input-row {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column; 
+            align-items: flex-start; 
             background-color: rgba(255, 255, 255, 0.35);
             border-radius: 16px;
-            padding: 10px 12px;
-            margin-bottom: 10px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
             transition: all 0.2s;
             z-index: 1;
         }
@@ -221,21 +222,24 @@
         }
 
         .input-label {
-            font-size: 0.85rem;
-            font-weight: 700;
-            opacity: 0.9;
+            font-size: 0.75rem; 
+            font-weight: 800;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px; 
         }
 
         .input-box {
             display: flex;
             align-items: center;
-            width: 70px;
+            width: 100%; 
         }
 
         .input-box span {
-            font-size: 0.95rem;
+            font-size: 1.1rem;
             font-weight: 800;
-            margin-right: 2px;
+            margin-right: 4px;
             opacity: 0.7;
         }
 
@@ -244,10 +248,10 @@
             border: none;
             background: transparent;
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            font-size: 1.05rem;
+            font-size: 1.15rem; 
             font-weight: 800;
             color: var(--text-dark);
-            text-align: right;
+            text-align: left; 
             outline: none;
             padding: 0;
         }
@@ -286,7 +290,6 @@
         .nav-item.home-btn { width: 60px; height: 60px; border-radius: 50%; background-color: var(--peach-orange); color: var(--text-dark); opacity: 1; border: 3px solid var(--text-dark); box-shadow: 0px 4px 0px var(--text-dark); transform: translateY(-12px); flex-shrink: 0; }
         .nav-item.home-btn:active { transform: translateY(-8px); box-shadow: 0px 0px 0px var(--text-dark); }
         .nav-item svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-
     </style>
 </head>
 <body>
@@ -297,7 +300,6 @@
     </nav>
 
     <div class="container">
-
         <!-- Widget Balance Total con Barra Visual -->
         <div class="widget-balance">
             <span class="pill-tag">Neto</span>
@@ -317,17 +319,13 @@
 
         <!-- Grid Bento -->
         <div class="bento-grid">
-            
             <!-- Widget: Me Deben -->
             <div class="widget-col widget-deben">
-                <!-- Marca de agua vectorial -->
                 <svg class="watermark-icon" viewBox="0 0 24 24" stroke="var(--text-dark)" stroke-width="1.5" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
-                
                 <div class="widget-header">
                     <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
                     Deben
                 </div>
-                
                 <div class="input-row">
                     <span class="input-label">Came</span>
                     <div class="input-box">
@@ -346,20 +344,16 @@
                         <span>$</span><input type="number" inputmode="decimal" class="input-field" id="in-otro" placeholder="0">
                     </div>
                 </div>
-
                 <div class="widget-subtotal" id="subtotal-deben">$0</div>
             </div>
 
             <!-- Widget: En Mano -->
             <div class="widget-col widget-mano">
-                <!-- Marca de agua vectorial -->
                 <svg class="watermark-icon" viewBox="0 0 24 24" stroke="var(--dark-green)" stroke-width="1.5" fill="none"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-                
                 <div class="widget-header">
                     <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect></svg>
                     Mano
                 </div>
-
                 <div class="input-row">
                     <span class="input-label">Tarjeta</span>
                     <div class="input-box">
@@ -378,12 +372,9 @@
                         <span>$</span><input type="number" inputmode="decimal" class="input-field" id="in-monedas" placeholder="0">
                     </div>
                 </div>
-
                 <div class="widget-subtotal" id="subtotal-mano">$0</div>
             </div>
-
         </div>
-
     </div>
 
     <!-- Barra Inferior -->
@@ -405,7 +396,6 @@
         </a>
     </nav>
 
-    <!-- MOTOR DE CÁLCULO Y PORCENTAJES -->
     <script>
         function formatCurrency(num) {
             return '$' + num.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 2});
@@ -415,7 +405,6 @@
             const came = parseFloat(document.getElementById('in-came').value) || 0;
             const mama = parseFloat(document.getElementById('in-mama').value) || 0;
             const otro = parseFloat(document.getElementById('in-otro').value) || 0;
-
             const tarjeta = parseFloat(document.getElementById('in-tarjeta').value) || 0;
             const cartera = parseFloat(document.getElementById('in-cartera').value) || 0;
             const monedas = parseFloat(document.getElementById('in-monedas').value) || 0;
@@ -424,17 +413,14 @@
             const totalMano = tarjeta + cartera + monedas;
             const grandTotal = totalDeben + totalMano;
 
-            // Actualizar Textos
             document.getElementById('subtotal-deben').textContent = formatCurrency(totalDeben);
             document.getElementById('subtotal-mano').textContent = formatCurrency(totalMano);
             document.getElementById('grand-total').textContent = formatCurrency(grandTotal);
 
-            // Calcular y animar la barra de progreso
-            let pctDeben = 0;
-            let pctMano = 0;
+            let pctDeben = 0; let pctMano = 0;
             if (grandTotal > 0) {
                 pctDeben = Math.round((totalDeben / grandTotal) * 100);
-                pctMano = 100 - pctDeben; // Para asegurar que sume 100 exactos
+                pctMano = 100 - pctDeben;
             }
 
             document.getElementById('bar-deben').style.width = pctDeben + '%';
@@ -442,7 +428,6 @@
             document.getElementById('pct-deben').textContent = pctDeben;
             document.getElementById('pct-mano').textContent = pctMano;
 
-            // Guardar en navegador
             const finData = { came, mama, otro, tarjeta, cartera, monedas };
             localStorage.setItem('myFinances', JSON.stringify(finData));
         }
@@ -453,7 +438,6 @@
                 if (savedData.came) document.getElementById('in-came').value = savedData.came;
                 if (savedData.mama) document.getElementById('in-mama').value = savedData.mama;
                 if (savedData.otro) document.getElementById('in-otro').value = savedData.otro;
-                
                 if (savedData.tarjeta) document.getElementById('in-tarjeta').value = savedData.tarjeta;
                 if (savedData.cartera) document.getElementById('in-cartera').value = savedData.cartera;
                 if (savedData.monedas) document.getElementById('in-monedas').value = savedData.monedas;

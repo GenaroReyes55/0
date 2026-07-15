@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Mi Espacio">
     <link rel="apple-touch-icon" href="icono.png">
     <link rel="icon" type="image/png" href="icono.png">
+    <link rel="manifest" href="manifest.json">
     
     <title>Mi Espacio Web</title>
     <style>
@@ -46,7 +47,7 @@
         .top-bar {
             width: 100%;
             background-color: transparent;
-            padding: calc(15px + env(safe-area-inset-top)) 20px 15px;
+            padding: calc(20px + env(safe-area-inset-top)) 20px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -153,19 +154,25 @@
             border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;
         }
         .schedule-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .schedule-info strong { font-size: 1rem; display: block; }
-        .schedule-time { font-size: 1.1rem; font-weight: 700; text-align: right; color: var(--pale-yellow);}
-        .schedule-time span { font-size: 0.8rem; display: block; color: rgba(255,255,255,0.6); font-weight: normal; }
+        .schedule-info span.name-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8; display: block; margin-bottom: 2px; }
+        .schedule-info strong { font-size: 1.05rem; display: block; }
+        .schedule-time { font-size: 0.95rem; font-weight: 700; text-align: right; color: var(--pale-yellow);}
 
         /* 2. DINERO */
         .widget-dinero { background-color: var(--pale-yellow); color: var(--dark-green); justify-content: center;}
-        .widget-dinero .amount { font-size: 2rem; font-weight: 800; font-family: "Georgia", serif; }
         .widget-dinero .label { font-size: 0.9rem; font-weight: 600; opacity: 0.7; }
+        .widget-dinero .amount { 
+            font-size: 2rem; 
+            font-weight: 800; 
+            font-family: "Georgia", serif; 
+            word-break: break-word; 
+            line-height: 1.1; 
+        }
 
         /* 3. META */
         .widget-meta { background-color: var(--lavender); color: var(--text-dark); justify-content: center;}
         .progress-bar-bg { width: 100%; height: 12px; background: rgba(0,0,0,0.1); border-radius: 20px; margin-top: 10px; overflow: hidden;}
-        .progress-bar-fill { width: 65%; height: 100%; background: var(--text-dark); border-radius: 20px; }
+        .progress-bar-fill { width: 0%; height: 100%; background: var(--text-dark); border-radius: 20px; transition: width 0.5s ease; }
 
         /* 4. NOTAS */
         .widget-notas { 
@@ -291,41 +298,48 @@
 
     <div class="container">
         <nav class="bento-grid">
+            
+            <!-- TARJETA: HORARIO (Vinculada y Actualizada en vivo para ambos) -->
             <a href="horario.html" class="widget widget-large widget-horario">
                 <div class="widget-header">
-                    <span class="widget-title">Horario</span>
-                    <span class="pill-tag">Hoy</span>
+                    <span class="widget-title">Horarios</span>
+                    <span class="pill-tag">En vivo</span>
                 </div>
                 <div class="schedule-list">
+                    <!-- Fila de Yo -->
                     <div class="schedule-item">
                         <div class="schedule-info">
-                            <strong>Escuela</strong>
+                            <span class="name-label" style="color: var(--pale-yellow);">Yo</span>
+                            <strong id="idx-horario-yo-status">Calculando...</strong>
                         </div>
-                        <div class="schedule-time">
-                            08:00
-                            <span>a 10:30</span>
+                        <div class="schedule-time" id="idx-horario-yo-time">
+                            --
                         </div>
                     </div>
+                    <!-- Fila de Vanessa -->
                     <div class="schedule-item">
                         <div class="schedule-info">
-                            <strong>Trabajo</strong>
+                            <span class="name-label" style="color: var(--pastel-pink);">Vanessa</span>
+                            <strong id="idx-horario-van-status">Calculando...</strong>
                         </div>
-                        <div class="schedule-time">
-                            Turno Tarde
+                        <div class="schedule-time" id="idx-horario-van-time" style="color: var(--pastel-pink);">
+                            --
                         </div>
                     </div>
                 </div>
             </a>
 
+            <!-- TARJETA: DINERO (Vinculada y Actualizada con localStorage) -->
             <a href="dinero.html" class="widget widget-dinero">
-                <div class="label">Balance</div>
-                <div class="amount">$0</div>
+                <div class="label">Balance Total</div>
+                <div class="amount" id="idx-dinero-amount">$0</div>
             </a>
 
+            <!-- TARJETA: META (Vinculada y Actualizada con localStorage) -->
             <a href="meta.html" class="widget widget-meta">
-                <span class="widget-title">Meta</span>
+                <span class="widget-title" id="idx-meta-text">Meta: 0%</span>
                 <div class="progress-bar-bg">
-                    <div class="progress-bar-fill"></div>
+                    <div class="progress-bar-fill" id="idx-meta-bar"></div>
                 </div>
             </a>
 
@@ -371,8 +385,94 @@
     </div>
 
     <script>
-        // Lógica de fechas del ticket
-        document.addEventListener("DOMContentLoaded", () => {
+        // --- ACTUALIZACIÓN DINÁMICA DE LOS WIDGETS ---
+
+        function formatCurrency(num) {
+            return '$' + parseFloat(num).toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:2});
+        }
+
+        function updateWidgetDinero() {
+            const savedData = JSON.parse(localStorage.getItem('myFinances')) || {};
+            const total = (savedData.came || 0) + (savedData.mama || 0) + (savedData.otro || 0) +
+                          (savedData.tarjeta || 0) + (savedData.cartera || 0) + (savedData.monedas || 0);
+            
+            document.getElementById('idx-dinero-amount').textContent = formatCurrency(total);
+        }
+
+        function updateWidgetMeta() {
+            const state = JSON.parse(localStorage.getItem('myPlansState')) || {};
+            let saldoReal = state.baseBalance || 0;
+            const target = state.target || 5000;
+            
+            if (state.plans && state.plans.length > 0) {
+                state.plans.forEach(p => {
+                    if (p.completed) {
+                        saldoReal += (p.type === 'in' ? p.amount : -p.amount);
+                    }
+                });
+            }
+            
+            let pct = target > 0 ? Math.round((saldoReal / target) * 100) : 0;
+            if (pct < 0) pct = 0;
+            if (pct > 100) pct = 100;
+            
+            document.getElementById('idx-meta-text').textContent = `Meta: ${pct}%`;
+            document.getElementById('idx-meta-bar').style.width = pct + '%';
+        }
+
+        function updateWidgetHorario() {
+            const now = new Date();
+            const day = now.getDay(); 
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const currentTime = hours + (minutes / 60);
+
+            let yoStatus = "Libre"; let yoTimeText = "--";
+            let vanStatus = "Libre"; let vanTimeText = "--";
+
+            if (day >= 1 && day <= 5) { 
+                if (currentTime < 8) {
+                    yoStatus = "Siguiente: Escuela"; yoTimeText = "08:00 AM";
+                } else if (currentTime >= 8 && currentTime < 11) {
+                    yoStatus = "En la Escuela"; yoTimeText = "Hasta 11:00 AM";
+                } else if (currentTime >= 11 && currentTime < 12) {
+                    yoStatus = "Traslado"; yoTimeText = "Al Trabajo";
+                } else if (currentTime >= 12 && currentTime < 16) {
+                    yoStatus = "En el Trabajo"; yoTimeText = "Hasta 04:00 PM";
+                } else {
+                    yoStatus = "Día Libre"; yoTimeText = "Hasta mañana";
+                }
+            } else if (day === 6) { 
+                if (currentTime < 7.5) {
+                    yoStatus = "Siguiente: Trabajo"; yoTimeText = "07:30 AM";
+                } else if (currentTime >= 7.5 && currentTime < 22) {
+                    yoStatus = "En el Trabajo"; yoTimeText = "Hasta 10:00 PM";
+                } else {
+                    yoStatus = "Día Libre"; yoTimeText = "Hasta el lunes";
+                }
+            } else { 
+                yoStatus = "Día Libre"; yoTimeText = "Descanso total";
+            }
+
+            if (day >= 1 && day <= 6) { 
+                if (currentTime < 18) {
+                    vanStatus = "Siguiente: Trabajo"; vanTimeText = "06:00 PM";
+                } else if (currentTime >= 18 && currentTime < 24) {
+                    vanStatus = "En el Trabajo"; vanTimeText = "Hasta 12:00 AM";
+                } else {
+                    vanStatus = "Día Libre"; vanTimeText = "Hasta mañana";
+                }
+            } else { 
+                vanStatus = "Día Libre"; vanTimeText = "Descanso total";
+            }
+
+            document.getElementById('idx-horario-yo-status').textContent = yoStatus;
+            document.getElementById('idx-horario-yo-time').textContent = yoTimeText;
+            document.getElementById('idx-horario-van-status').textContent = vanStatus;
+            document.getElementById('idx-horario-van-time').textContent = vanTimeText;
+        }
+
+        function updateTicketFechas() {
             const fechaInicio = new Date('2026-04-15T00:00:00');
             const fechaHoy = new Date(); 
             
@@ -397,6 +497,14 @@
 
             document.getElementById('total-dias').textContent = diasTotales + " días de relación";
             document.getElementById('conversion-meses').textContent = mesesTotales + " meses y " + dias + " días juntos";
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            updateTicketFechas();
+            updateWidgetDinero();
+            updateWidgetMeta();
+            updateWidgetHorario();
+            setInterval(updateWidgetHorario, 60000); 
         });
 
         // --- LÓGICA DEL RESPALDO (BACKUP) ---
@@ -415,53 +523,51 @@
                 const key = localStorage.key(i);
                 backupData[key] = localStorage.getItem(key);
             }
-            
             if (Object.keys(backupData).length === 0) {
-                alert("Aún no tienes información guardada en la aplicación para respaldar.");
+                alert("Aún no tienes información guardada para respaldar.");
                 return;
             }
-
             const jsonStr = JSON.stringify(backupData, null, 2);
             const blob = new Blob([jsonStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
-
             const a = document.createElement('a');
             a.href = url;
-            
             const fileDate = new Date().toISOString().split('T')[0];
             a.download = `MiEspacio_Respaldo_${fileDate}.json`;
-            
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            
             closeBackupModal();
         }
 
         function loadBackup(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
-                    
                     for (const key in data) {
                         localStorage.setItem(key, data[key]);
                     }
-                    
-                    alert("¡Datos restaurados con éxito! Tu información está de vuelta.");
+                    alert("¡Datos restaurados con éxito!");
                     closeBackupModal();
-                    // Refrescar para aplicar los cambios visuales si hubiera variables
                     window.location.reload(); 
-                    
                 } catch (error) {
-                    alert("Error al leer el archivo. Asegúrate de cargar el respaldo correcto (.json).");
+                    alert("Error al restaurar archivo.");
                 }
             };
             reader.readAsText(file);
+        }
+
+        // --- REGISTRO DEL SERVICE WORKER (SOPORTE OFFLINE) ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker cargado con éxito para offline', reg))
+                    .catch(err => console.log('Error al registrar Service Worker', err));
+            });
         }
     </script>
 </body>
