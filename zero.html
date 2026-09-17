@@ -9,7 +9,7 @@
     <link rel="apple-touch-icon" href="icono.png">
     <link rel="icon" type="image/png" href="icono.png">
     <link rel="manifest" href="manifest.json">
-    <title>Zero - Rutina y Progreso</title>
+    <title>Zero - Rutina, Comidas y Progreso</title>
     <style>
         :root {
             --bg-main: #dbe9d0c4;
@@ -70,8 +70,52 @@
             gap: 20px;
         }
 
-        /* --- WIDGET PROGRESO DINÁMICO --- */
-        .progress-bento {
+        /* --- SELECTOR PRINCIPAL (MASTER SWITCH) --- */
+        .master-tabs {
+            display: flex;
+            background-color: rgba(255, 255, 255, 0.6);
+            padding: 6px;
+            border-radius: 28px;
+            gap: 6px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            margin-bottom: 5px;
+        }
+        .master-tab {
+            flex: 1;
+            padding: 14px 0;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--dark-green);
+            border-radius: 22px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .master-tab.active {
+            background-color: var(--text-dark);
+            color: var(--mint-green);
+            transform: scale(1.02);
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* --- SECCIONES PRINCIPALES --- */
+        .main-section {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .main-section.active {
+            display: flex;
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- ESTILOS COMPARTIDOS BENTOS --- */
+        .bento-card {
             background-color: var(--text-light);
             border-radius: 32px;
             padding: 22px;
@@ -80,12 +124,17 @@
             gap: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.03);
         }
-        .progress-header {
+        .bento-card.dark {
+            background-color: var(--dark-green);
+            color: var(--text-light);
+        }
+        
+        .bento-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .progress-title {
+        .bento-title {
             font-family: "Georgia", serif;
             font-size: 1.2rem;
             font-weight: 800;
@@ -94,7 +143,9 @@
             align-items: center;
             gap: 8px;
         }
-        .date-badge {
+        .bento-card.dark .bento-title { color: var(--mint-green); }
+        
+        .badge {
             background-color: var(--text-dark);
             color: var(--mint-green);
             font-size: 0.75rem;
@@ -103,64 +154,26 @@
             border-radius: 20px;
             text-transform: uppercase;
         }
-        
-        /* Barra visual */
-        .progress-container {
-            width: 100%;
-        }
-        .progress-bar-bg {
-            width: 100%;
-            height: 14px;
-            background-color: rgba(26, 28, 26, 0.1);
-            border-radius: 20px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background-color: var(--mint-green);
-            width: 0%;
-            transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1);
-        }
+        .badge.alt { background-color: var(--lavender); color: var(--text-dark); }
 
-        /* Bloques de estado */
-        .status-block {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .status-block.highlight {
-            background-color: rgba(161, 140, 238, 0.15);
-            padding: 14px;
-            border-radius: 16px;
-            border-left: 4px solid var(--lavender);
-        }
-        .status-label {
-            font-size: 0.75rem;
-            font-weight: 900;
-            color: var(--dark-green);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .status-text {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: rgba(26, 28, 26, 0.7);
-            line-height: 1.4;
-        }
-        .status-block.highlight .status-text {
-            color: var(--text-dark);
-            font-weight: 700;
-        }
+        /* --- PROGRESO BENTO --- */
+        .progress-bar-bg { width: 100%; height: 14px; background-color: rgba(26, 28, 26, 0.1); border-radius: 20px; overflow: hidden; }
+        .progress-fill { height: 100%; background-color: var(--mint-green); width: 0%; transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
+        .status-block { display: flex; flex-direction: column; gap: 6px; }
+        .status-block.highlight { background-color: rgba(161, 140, 238, 0.15); padding: 14px; border-radius: 16px; border-left: 4px solid var(--lavender); }
+        .status-label { font-size: 0.75rem; font-weight: 900; color: var(--dark-green); text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-text { font-size: 0.85rem; font-weight: 600; color: rgba(26, 28, 26, 0.7); line-height: 1.4; }
+        .status-block.highlight .status-text { color: var(--text-dark); font-weight: 700; }
 
-        /* --- SELECTOR DE DÍAS --- */
-        .day-selector {
+        /* --- SELECTORES INTERNOS (TABS) --- */
+        .sub-tabs {
             display: flex;
             background-color: rgba(255, 255, 255, 0.5);
             padding: 6px;
             border-radius: 24px;
             gap: 6px;
         }
-        .day-tab {
+        .sub-tab {
             flex: 1;
             padding: 12px 0;
             text-align: center;
@@ -172,190 +185,58 @@
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
         }
-        .day-tab.active {
-            background-color: var(--text-dark);
-            color: var(--mint-green);
-            transform: scale(1.02);
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-        }
+        .sub-tab.active { background-color: var(--text-dark); color: var(--mint-green); transform: scale(1.02); box-shadow: 0px 4px 10px rgba(0,0,0,0.1); }
 
-        /* --- LISTA DE EJERCICIOS --- */
-        .routine-view {
-            display: none;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .routine-view.active {
-            display: flex;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        /* --- RUTINA --- */
+        .info-text { font-size: 0.85rem; font-weight: 600; color: rgba(26, 28, 26, 0.7); line-height: 1.5; }
+        .info-text strong { color: var(--text-dark); font-weight: 800; }
+        .highlight-box { background-color: rgba(156, 246, 168, 0.3); border-radius: 16px; padding: 12px; font-size: 0.8rem; font-weight: 700; color: var(--dark-green); display: flex; align-items: center; gap: 10px; }
         
-        .exercise-card {
-            background-color: var(--text-light);
-            border-radius: 24px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
-        }
-        .ex-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .ex-number {
-            width: 32px;
-            height: 32px;
-            background-color: var(--pale-yellow);
-            color: var(--dark-green);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            font-size: 0.9rem;
-            flex-shrink: 0;
-        }
-        .ex-name {
-            font-size: 0.95rem;
-            font-weight: 800;
-            color: var(--text-dark);
-            line-height: 1.2;
-        }
-        .ex-stats {
-            display: flex;
-            gap: 8px;
-            margin-left: 44px;
-        }
-        .stat-pill {
-            background-color: rgba(26, 28, 26, 0.05);
-            color: var(--text-dark);
-            font-size: 0.7rem;
-            font-weight: 800;
-            padding: 6px 10px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
+        .routine-view, .meal-view { display: none; flex-direction: column; gap: 12px; }
+        .routine-view.active, .meal-view.active { display: flex; animation: fadeIn 0.3s ease-in-out; }
+        
+        .exercise-card { background-color: var(--text-light); border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        .ex-header { display: flex; align-items: center; gap: 12px; }
+        .ex-number { width: 32px; height: 32px; background-color: var(--pale-yellow); color: var(--dark-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.9rem; flex-shrink: 0; }
+        .ex-name { font-size: 0.95rem; font-weight: 800; color: var(--text-dark); line-height: 1.2; }
+        .ex-stats { display: flex; gap: 8px; margin-left: 44px; }
+        .stat-pill { background-color: rgba(26, 28, 26, 0.05); color: var(--text-dark); font-size: 0.7rem; font-weight: 800; padding: 6px 10px; border-radius: 12px; display: flex; align-items: center; gap: 4px; }
         .stat-pill.rest { background-color: rgba(250, 142, 98, 0.15); color: #B54D24; }
 
-        /* --- REGLAS BENTO --- */
-        .rules-bento {
-            background-color: var(--dark-green);
-            color: var(--text-light);
-            border-radius: 32px;
-            padding: 22px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .rule-item {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            padding-bottom: 12px;
-            border-bottom: 1px dashed rgba(255,255,255,0.2);
-        }
+        /* Reglas */
+        .rule-item { display: flex; flex-direction: column; gap: 4px; padding-bottom: 12px; border-bottom: 1px dashed rgba(255,255,255,0.2); }
         .rule-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .rule-title {
-            font-size: 0.9rem;
-            font-weight: 800;
-            color: var(--mint-green);
-            text-transform: uppercase;
-        }
-        .rule-desc {
-            font-size: 0.8rem;
-            font-weight: 600;
-            line-height: 1.4;
-            opacity: 0.85;
-        }
+        .rule-title { font-size: 0.9rem; font-weight: 800; color: var(--mint-green); text-transform: uppercase; }
+        .rule-desc { font-size: 0.8rem; font-weight: 600; line-height: 1.4; opacity: 0.85; }
+
+        /* --- COMIDAS --- */
+        .meal-item { background-color: rgba(26, 28, 26, 0.03); border-radius: 20px; padding: 14px; display: flex; flex-direction: column; gap: 4px; border-left: 4px solid var(--text-dark); }
+        .meal-item.food { border-left-color: var(--peach-orange); }
+        .meal-item.gym { border-left-color: var(--mint-green); }
+        .meal-item.uni { border-left-color: var(--lavender); }
+        .meal-time { font-family: "Georgia", serif; font-weight: 900; font-size: 0.9rem; }
+        .meal-item.food .meal-time { color: #B54D24; }
+        .meal-item.gym .meal-time { color: var(--dark-green); }
+        .meal-item.uni .meal-time { color: #5B44A3; }
+        .meal-title { font-weight: 800; font-size: 0.95rem; color: var(--text-dark); margin-top: 2px; }
+        .meal-desc { font-size: 0.8rem; font-weight: 600; color: rgba(26, 28, 26, 0.7); line-height: 1.4; }
+        .meal-desc strong { color: var(--text-dark); }
 
         /* --- TIMELINE DE PROGRESO BENTO --- */
-        .timeline-bento {
-            background-color: var(--text-light);
-            border-radius: 32px;
-            padding: 22px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-        }
-        .timeline-item {
-            display: flex;
-            gap: 15px;
-            position: relative;
-            padding-bottom: 20px;
-        }
-        .timeline-item:last-child {
-            padding-bottom: 0;
-        }
-        .timeline-line {
-            position: absolute;
-            left: 7.5px;
-            top: 25px;
-            bottom: 0;
-            width: 2px;
-            background-color: rgba(26, 28, 26, 0.1);
-        }
-        .timeline-dot {
-            width: 17px;
-            height: 17px;
-            border-radius: 50%;
-            border: 3px solid var(--dark-green);
-            flex-shrink: 0;
-            z-index: 1;
-            margin-top: 3px;
-        }
-        .timeline-content {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .timeline-month {
-            font-size: 0.95rem;
-            font-weight: 800;
-            color: var(--dark-green);
-        }
-        .timeline-desc {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: rgba(26, 28, 26, 0.7);
-            line-height: 1.4;
-        }
-        .timeline-desc strong {
-            color: var(--text-dark);
-            font-weight: 800;
-        }
+        .timeline-item { display: flex; gap: 15px; position: relative; padding-bottom: 20px; }
+        .timeline-item:last-child { padding-bottom: 0; }
+        .timeline-line { position: absolute; left: 7.5px; top: 25px; bottom: 0; width: 2px; background-color: rgba(26, 28, 26, 0.1); }
+        .timeline-dot { width: 17px; height: 17px; border-radius: 50%; border: 3px solid var(--dark-green); flex-shrink: 0; z-index: 1; margin-top: 3px; }
+        .timeline-content { display: flex; flex-direction: column; gap: 4px; }
+        .timeline-month { font-size: 0.95rem; font-weight: 800; color: var(--dark-green); }
+        .timeline-desc { font-size: 0.8rem; font-weight: 600; color: rgba(26, 28, 26, 0.7); line-height: 1.4; }
+        .timeline-desc strong { color: var(--text-dark); font-weight: 800; }
 
         /* --- BARRA INFERIOR --- */
-        .bottom-nav {
-            position: fixed;
-            bottom: calc(20px + env(safe-area-inset-bottom));
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 30px);
-            max-width: 380px;
-            background-color: var(--text-light);
-            border: 3px solid var(--text-dark);
-            border-radius: 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 15px;
-            box-shadow: 6px 6px 0px var(--text-dark);
-            z-index: 100;
-        }
+        .bottom-nav { position: fixed; bottom: calc(20px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: calc(100% - 30px); max-width: 380px; background-color: var(--text-light); border: 3px solid var(--text-dark); border-radius: 40px; display: flex; justify-content: space-between; align-items: center; padding: 6px 15px; box-shadow: 6px 6px 0px var(--text-dark); z-index: 100; }
         .nav-item { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 16px; color: var(--text-dark); opacity: 0.5; text-decoration: none; transition: all 0.2s; }
         .nav-item:active { opacity: 1; transform: scale(0.9); }
-        .nav-item.home-btn {
-            width: 60px; height: 60px; border-radius: 50%; background-color: var(--peach-orange); color: var(--text-dark); opacity: 1; border: 3px solid var(--text-dark); box-shadow: 0px 4px 0px var(--text-dark); transform: translateY(-12px); flex-shrink: 0;
-        }
+        .nav-item.home-btn { width: 60px; height: 60px; border-radius: 50%; background-color: var(--peach-orange); color: var(--text-dark); opacity: 1; border: 3px solid var(--text-dark); box-shadow: 0px 4px 0px var(--text-dark); transform: translateY(-12px); flex-shrink: 0; }
         .nav-item.home-btn:active { transform: translateY(-8px); box-shadow: 0px 0px 0px var(--text-dark); }
         .nav-item svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
     </style>
@@ -366,353 +247,402 @@
     </nav>
     <div class="container">
         
-        <!-- WIDGET PROGRESO DINÁMICO -->
-        <div class="progress-bento">
-            <div class="progress-header">
-                <div class="progress-title">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                    Fase 1: Adaptación
+        <!-- SELECTOR PRINCIPAL (MASTER SWITCH) -->
+        <div class="master-tabs">
+            <div class="master-tab active" onclick="switchMain('gym')">Gym</div>
+            <div class="master-tab" onclick="switchMain('comidas')">Comidas</div>
+            <div class="master-tab" onclick="switchMain('progreso')">Progreso</div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SECCIÓN 1: GYM (Rutinas)                       -->
+        <!-- ============================================== -->
+        <div id="main-gym" class="main-section active">
+            
+            <div class="bento-card">
+                <div class="bento-header">
+                    <div class="bento-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M9 8h6l-6 8h6"></path></svg>
+                        Fase de Volumen
+                    </div>
+                    <div class="badge alt">21 Sep</div>
                 </div>
-                <div class="date-badge" id="days-badge">Día 0/30</div>
+                <div class="info-text">
+                    Mantendrás esta rutina de <strong>8 a 12 semanas</strong>. Entrenarás Lunes, Miércoles y Viernes a las <strong>10:00 AM</strong>.
+                </div>
+                <div class="highlight-box">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                    Descansa M/J/S/D.
+                </div>
+            </div>
+
+            <!-- Tabs Internas de Días de Rutina -->
+            <div class="sub-tabs">
+                <div class="sub-tab day-tab active" onclick="switchDay('lunes')">Lunes</div>
+                <div class="sub-tab day-tab" onclick="switchDay('miercoles')">Miérc</div>
+                <div class="sub-tab day-tab" onclick="switchDay('viernes')">Viern</div>
+            </div>
+
+            <!-- Rutina Lunes -->
+            <div class="routine-view active" id="view-lunes">
+                <div class="exercise-card">
+                    <div class="ex-header"><div class="ex-number">1</div><div class="ex-name">Prensa de Piernas (o Sentadilla)</div></div>
+                    <div class="ex-stats"><div class="stat-pill">3 Series</div><div class="stat-pill">10-12 Reps</div><div class="stat-pill rest">90s</div></div>
+                </div>
+                <div class="exercise-card">
+                    <div class="ex-header"><div class="ex-number">2</div><div class="ex-name">Press de Pecho en Máquina</div></div>
+                    <div class="ex-stats"><div class="stat-pill">3 Series</div><div class="stat-pill">10-12 Reps</div><div class="stat-pill rest">90s</div></div>
+                </div>
+                <div class="exercise-card">
+                    <div class="ex-header"><div class="ex-number">3</div><div class="ex-name">Jalón al Pecho en Polea</div></div>
+                    <div class="ex-stats"><div class="stat-pill">3 Series</div><div class="stat-pill">10-12 Reps</div><div class="stat-pill rest">90s</div></div>
+                </div>
+                <div class="exercise-card">
+                    <div class="ex-header"><div class="ex-number" style="background-color: var(--pastel-pink);">4</div><div class="ex-name">Elevaciones Laterales (Hombros)</div></div>
+                    <div class="ex-stats"><div class="stat-pill">3 Series</div><div class="stat-pill">12-15 Reps</div><div class="stat-pill rest">60s</div></div>
+                </div>
+                <div class="exercise-card">
+                    <div class="ex-header"><div class="ex-number" style="background-color: var(--pastel-pink);">5</div><div class="ex-name">Curl de Bíceps con Mancuernas</div></div>
+                    <div class="ex-stats"><div class="stat-pill">2 Series</div><div class="stat-pill">12-15 Reps</div><div class="stat-pill rest">60s</div></div>
+                </div>
+            </div>
+
+            <!-- Rutina Miércoles -->
+            <div class="routine-view" id="view-miercoles">
+                <div class="exercise-card">
+                    <div class="ex-header"><div class="ex-number">1</div><div class="ex-name">Peso Muerto Rumano</div></div>
+                    <div class="ex-stats"><div class="stat-pill">3 Series</div><div class="stat-pill">10-12 Reps</div><div class="stat-pill rest">90s</div></div>
+                </div>
+                <div class="exercise-card">
+                    <div class="ex-header"><div class="ex-number">2</div><div class="ex-name">Press Militar</div></div>
+                    <div class="ex-stats"><div class="stat-pill">3 Series</div><div class="stat-pill">10-12 Reps</div><div class="stat-pill rest">90s</div></div>
+                </div>
+                <div class="exercise-card">
+                    <div class="ex-header"><div class="ex-number">3</div><div class="ex-name">Remo Gironda</div></div>
+                    <div class="ex-stats"><div class="stat-pill">3 Series</div><div class="stat-pill">10-12 Reps</div><div class="stat-pill rest">90s</div></div>
+                </div>
+                <div class="exercise-card">
+                    <div class="ex-header"><div class="ex-number" style="background-color: var(--pastel-pink);">4</div><div class="ex-name">Extensión de Piernas (Cuádriceps)</div></div>
+                    <div class="ex-stats"><div class="stat-pill">3 Series</div><div class="stat-pill">12-15 Reps</div><div class="stat-pill rest">60s</div></div>
+                </div>
+                <div class="exercise-card">
+                    <div class="ex-header"><div class="ex-number" style="background-color: var(--pastel-pink);">5</div><div class="ex-name">Extensión de Tríceps en Polea</div></div>
+                    <div class="ex-stats"><div class="stat-pill">2 Series</div><div class="stat-pill">12-15 Reps</div><div class="stat-pill rest">60s</div></div>
+                </div>
+            </div>
+
+            <!-- Rutina Viernes -->
+            <div class="routine-view" id="view-viernes">
+                <div class="exercise-card">
+                    <div class="ex-header"><div class="ex-number">1</div><div class="ex-name">Zancadas (Desplantes)</div></div>
+                    <div class="ex-stats"><div class="stat-pill">3 Series</div><div class="stat-pill">10 c/pierna</div><div class="stat-pill rest">90s</div></div>
+                </div>
+                <div class="exercise-card">
+                    <div class="ex-header"><div class="ex-number">2</div><div class="ex-name">Press Inclinado</div></div>
+                    <div class="ex-stats"><div class="stat-pill">3 Series</div><div class="stat-pill">10-12 Reps</div><div class="stat-pill rest">90s</div></div>
+                </div>
+                <div class="exercise-card">
+                    <div class="ex-header"><div class="ex-number">3</div><div class="ex-name">Remo a una Mano</div></div>
+                    <div class="ex-stats"><div class="stat-pill">3 Series</div><div class="stat-pill">10-12 Reps</div><div class="stat-pill rest">90s</div></div>
+                </div>
+                <div class="exercise-card">
+                    <div class="ex-header"><div class="ex-number" style="background-color: var(--pastel-pink);">4</div><div class="ex-name">Curl de Isquiotibiales</div></div>
+                    <div class="ex-stats"><div class="stat-pill">3 Series</div><div class="stat-pill">12-15 Reps</div><div class="stat-pill rest">60s</div></div>
+                </div>
+                <div class="exercise-card">
+                    <div class="ex-header"><div class="ex-number" style="background-color: var(--peach-orange);">5</div><div class="ex-name">Plancha Abdominal</div></div>
+                    <div class="ex-stats"><div class="stat-pill">3 Series</div><div class="stat-pill">30-45 seg</div><div class="stat-pill rest">60s</div></div>
+                </div>
+            </div>
+
+            <!-- Reglas Bento -->
+            <div class="bento-card dark">
+                <div class="rule-item">
+                    <div class="rule-title">Sobrecarga Progresiva</div>
+                    <div class="rule-desc">La semana 1 usa pesos ligeros para técnica. Luego, levanta más peso o saca una repetición más que la semana anterior.</div>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-title">Tensión Bajo Control</div>
+                    <div class="rule-desc">Baja el peso lentamente (2-3s) y súbelo fuerte (1s). El músculo debe sentir la tensión real.</div>
+                </div>
+                <div class="rule-item" style="border:none;">
+                    <div class="rule-title">Intensidad RIR 1-2</div>
+                    <div class="rule-desc">No llegues al fallo total donde pierdas la postura. Deja 1 o 2 repeticiones "en el tanque".</div>
+                </div>
             </div>
             
-            <div class="progress-container">
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SECCIÓN 2: COMIDAS Y HORARIO                   -->
+        <!-- ============================================== -->
+        <div id="main-comidas" class="main-section">
+            <div class="bento-card">
+                <div class="bento-header" style="margin-bottom: 5px;">
+                    <div class="bento-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path>
+                            <path d="M7 2v20"></path>
+                            <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"></path>
+                        </svg>
+                        Horario de Comidas
+                    </div>
+                </div>
+
+                <!-- Tabs Internas de Comidas -->
+                <div class="sub-tabs" style="margin-bottom: 10px;">
+                    <div class="sub-tab meal-tab active" onclick="switchMeal('lun-mie')">Lun/Mié</div>
+                    <div class="sub-tab meal-tab" onclick="switchMeal('mar-jue')">Mar/Jue</div>
+                    <div class="sub-tab meal-tab" onclick="switchMeal('vie')">Viernes</div>
+                </div>
+
+                <!-- Horario Lun/Mie -->
+                <div class="meal-view active" id="meal-lun-mie">
+                    <div class="meal-item food">
+                        <div class="meal-time">09:30 AM</div>
+                        <div class="meal-title">Desayuno (Pre-entreno)</div>
+                        <div class="meal-desc">Batido de avena, leche, 1 plátano y crema de maní.</div>
+                    </div>
+                    <div class="meal-item gym">
+                        <div class="meal-time">10:35 AM - 11:45 AM</div>
+                        <div class="meal-title">Gym (Full Body)</div>
+                        <div class="meal-desc">Entrenamiento intenso (1 hr) + trayectos.</div>
+                    </div>
+                    <div class="meal-item food">
+                        <div class="meal-time">11:55 AM</div>
+                        <div class="meal-title">Comida (Post-entreno)</div>
+                        <div class="meal-desc">Arroz o pasta, frijoles y 3-4 huevos revueltos.</div>
+                    </div>
+                    <div class="meal-item uni">
+                        <div class="meal-time">12:25 PM - 02:00 PM</div>
+                        <div class="meal-title">Alistarse y Universidad</div>
+                        <div class="meal-desc">Baño y 1h de trayecto. Clases inician 02:00 PM.</div>
+                    </div>
+                    <div class="meal-item food">
+                        <div class="meal-time">04:00 PM</div>
+                        <div class="meal-title">Snack Libre</div>
+                        <div class="meal-desc">2 sándwiches de crema de maní.</div>
+                    </div>
+                    <div class="meal-item food">
+                        <div class="meal-time">07:00 PM</div>
+                        <div class="meal-title">Snack Rápido</div>
+                        <div class="meal-desc">Cacahuates o plátano entre clases.</div>
+                    </div>
+                    <div class="meal-item uni">
+                        <div class="meal-time">09:00 PM</div>
+                        <div class="meal-title">Regreso a Casa</div>
+                        <div class="meal-desc">1 hora de trayecto.</div>
+                    </div>
+                    <div class="meal-item food">
+                        <div class="meal-time">10:00 PM</div>
+                        <div class="meal-title">Cena y Descanso</div>
+                        <div class="meal-desc">Repite arroz, frijoles y huevos para recuperar.</div>
+                    </div>
+                </div>
+
+                <!-- Horario Mar/Jue -->
+                <div class="meal-view" id="meal-mar-jue">
+                    <div class="meal-item food">
+                        <div class="meal-time">10:00 AM</div>
+                        <div class="meal-title">Desayuno Fuerte</div>
+                        <div class="meal-desc">Batido o huevos con arroz. Tómate tu tiempo.</div>
+                    </div>
+                    <div class="meal-item uni">
+                        <div class="meal-time">12:25 PM - 02:00 PM</div>
+                        <div class="meal-title">Alistarse y Traslado</div>
+                        <div class="meal-desc">Clases inician a las 14:00.</div>
+                    </div>
+                    <div class="meal-item food">
+                        <div class="meal-time">04:00 PM</div>
+                        <div class="meal-title">Snack (Hueco libre)</div>
+                        <div class="meal-desc">Sándwiches de crema de maní.</div>
+                    </div>
+                    <div class="meal-item food">
+                        <div class="meal-time">06:00 PM</div>
+                        <div class="meal-title">Hueco Libre (Solo Martes)</div>
+                        <div class="meal-desc">Plátanos y cacahuates antes de la última clase.</div>
+                    </div>
+                    <div class="meal-item uni">
+                        <div class="meal-time">09:00 PM</div>
+                        <div class="meal-title">Salida a Casa</div>
+                        <div class="meal-desc">(Jueves sales a las 18:00 y cenas temprano).</div>
+                    </div>
+                </div>
+
+                <!-- Horario Viernes -->
+                <div class="meal-view" id="meal-vie">
+                    <div class="meal-item food">
+                        <div class="meal-time">09:30 AM</div>
+                        <div class="meal-title">Desayuno (Pre-entreno)</div>
+                        <div class="meal-desc">Batido completo.</div>
+                    </div>
+                    <div class="meal-item gym">
+                        <div class="meal-time">10:45 AM - 11:45 AM</div>
+                        <div class="meal-title">Gym (Full Body)</div>
+                        <div class="meal-desc">Dale al 100% (Enfoque C).</div>
+                    </div>
+                    <div class="meal-item food">
+                        <div class="meal-time">11:55 AM</div>
+                        <div class="meal-title">Comida (Post-entreno)</div>
+                        <div class="meal-desc">Arroz, frijoles y huevos.</div>
+                    </div>
+                    <div class="meal-item uni">
+                        <div class="meal-time">04:25 PM - 06:00 PM</div>
+                        <div class="meal-title">Tarde Libre y Traslado</div>
+                        <div class="meal-desc">Clase única a las 06:00 PM.</div>
+                    </div>
+                    <div class="meal-item uni">
+                        <div class="meal-time">07:00 PM</div>
+                        <div class="meal-title">Salida a Casa</div>
+                        <div class="meal-desc">1 hora de trayecto.</div>
+                    </div>
+                    <div class="meal-item food">
+                        <div class="meal-time">08:00 PM</div>
+                        <div class="meal-title">Cena</div>
+                        <div class="meal-desc">Lo que prepare la familia (proteína/carbohidratos).</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SECCIÓN 3: PROGRESO Y TIMELINE                 -->
+        <!-- ============================================== -->
+        <div id="main-progreso" class="main-section">
+            
+            <!-- Progreso Dinámico -->
+            <div class="bento-card">
+                <div class="bento-header">
+                    <div class="bento-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        Fase 1: Adaptación
+                    </div>
+                    <div class="badge" id="days-badge">Día 0/30</div>
+                </div>
+                
                 <div class="progress-bar-bg">
                     <div class="progress-fill" id="progress-bar"></div>
                 </div>
-            </div>
 
-            <div class="status-block">
-                <div class="status-label">Experimentando ahora:</div>
-                <div class="status-text" id="current-status">Calculando tu estado actual...</div>
-            </div>
-            
-            <div class="status-block highlight">
-                <div class="status-label">Meta a final de mes (Oct 14):</div>
-                <div class="status-text">Adaptación del sistema nervioso, mejoría postural, aumento de apetito y subida de peso inicial (0.5 a 1 kg).</div>
-            </div>
-        </div>
-
-        <!-- SELECTOR DE DÍAS -->
-        <div class="day-selector">
-            <div class="day-tab active" onclick="switchDay('lunes')">Lunes</div>
-            <div class="day-tab" onclick="switchDay('miercoles')">Miérc</div>
-            <div class="day-tab" onclick="switchDay('viernes')">Viern</div>
-        </div>
-
-        <!-- RUTINA LUNES -->
-        <div class="routine-view active" id="view-lunes">
-            <div class="exercise-card">
-                <div class="ex-header">
-                    <div class="ex-number">1</div>
-                    <div class="ex-name">Prensa de Piernas (o Sentadilla)</div>
+                <div class="status-block">
+                    <div class="status-label">Experimentando ahora:</div>
+                    <div class="status-text" id="current-status">Calculando tu estado actual...</div>
                 </div>
-                <div class="ex-stats">
-                    <div class="stat-pill">3 Series</div>
-                    <div class="stat-pill">10-12 Reps</div>
-                    <div class="stat-pill rest">90s</div>
-                </div>
-            </div>
-            <div class="exercise-card">
-                <div class="ex-header">
-                    <div class="ex-number">2</div>
-                    <div class="ex-name">Press de Pecho en Máquina (o Mancuernas)</div>
-                </div>
-                <div class="ex-stats">
-                    <div class="stat-pill">3 Series</div>
-                    <div class="stat-pill">10-12 Reps</div>
-                    <div class="stat-pill rest">90s</div>
-                </div>
-            </div>
-            <div class="exercise-card">
-                <div class="ex-header">
-                    <div class="ex-number">3</div>
-                    <div class="ex-name">Jalón al Pecho en Polea</div>
-                </div>
-                <div class="ex-stats">
-                    <div class="stat-pill">3 Series</div>
-                    <div class="stat-pill">10-12 Reps</div>
-                    <div class="stat-pill rest">90s</div>
-                </div>
-            </div>
-            <div class="exercise-card">
-                <div class="ex-header">
-                    <div class="ex-number" style="background-color: var(--pastel-pink);">4</div>
-                    <div class="ex-name">Elevaciones Laterales (Hombros)</div>
-                </div>
-                <div class="ex-stats">
-                    <div class="stat-pill">3 Series</div>
-                    <div class="stat-pill">12-15 Reps</div>
-                    <div class="stat-pill rest">60s</div>
-                </div>
-            </div>
-            <div class="exercise-card">
-                <div class="ex-header">
-                    <div class="ex-number" style="background-color: var(--pastel-pink);">5</div>
-                    <div class="ex-name">Curl de Bíceps con Mancuernas</div>
-                </div>
-                <div class="ex-stats">
-                    <div class="stat-pill">2 Series</div>
-                    <div class="stat-pill">12-15 Reps</div>
-                    <div class="stat-pill rest">60s</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- RUTINA MIÉRCOLES -->
-        <div class="routine-view" id="view-miercoles">
-            <div class="exercise-card">
-                <div class="ex-header">
-                    <div class="ex-number">1</div>
-                    <div class="ex-name">Peso Muerto Rumano con Mancuernas</div>
-                </div>
-                <div class="ex-stats">
-                    <div class="stat-pill">3 Series</div>
-                    <div class="stat-pill">10-12 Reps</div>
-                    <div class="stat-pill rest">90s</div>
-                </div>
-            </div>
-            <div class="exercise-card">
-                <div class="ex-header">
-                    <div class="ex-number">2</div>
-                    <div class="ex-name">Press Militar en Máquina o Mancuernas</div>
-                </div>
-                <div class="ex-stats">
-                    <div class="stat-pill">3 Series</div>
-                    <div class="stat-pill">10-12 Reps</div>
-                    <div class="stat-pill rest">90s</div>
-                </div>
-            </div>
-            <div class="exercise-card">
-                <div class="ex-header">
-                    <div class="ex-number">3</div>
-                    <div class="ex-name">Remo Gironda (Sentado en Polea)</div>
-                </div>
-                <div class="ex-stats">
-                    <div class="stat-pill">3 Series</div>
-                    <div class="stat-pill">10-12 Reps</div>
-                    <div class="stat-pill rest">90s</div>
-                </div>
-            </div>
-            <div class="exercise-card">
-                <div class="ex-header">
-                    <div class="ex-number" style="background-color: var(--pastel-pink);">4</div>
-                    <div class="ex-name">Extensión de Piernas (Cuádriceps)</div>
-                </div>
-                <div class="ex-stats">
-                    <div class="stat-pill">3 Series</div>
-                    <div class="stat-pill">12-15 Reps</div>
-                    <div class="stat-pill rest">60s</div>
-                </div>
-            </div>
-            <div class="exercise-card">
-                <div class="ex-header">
-                    <div class="ex-number" style="background-color: var(--pastel-pink);">5</div>
-                    <div class="ex-name">Extensión de Tríceps en Polea</div>
-                </div>
-                <div class="ex-stats">
-                    <div class="stat-pill">2 Series</div>
-                    <div class="stat-pill">12-15 Reps</div>
-                    <div class="stat-pill rest">60s</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- RUTINA VIERNES -->
-        <div class="routine-view" id="view-viernes">
-            <div class="exercise-card">
-                <div class="ex-header">
-                    <div class="ex-number">1</div>
-                    <div class="ex-name">Zancadas (Desplantes) con Mancuernas</div>
-                </div>
-                <div class="ex-stats">
-                    <div class="stat-pill">3 Series</div>
-                    <div class="stat-pill">10 c/pierna</div>
-                    <div class="stat-pill rest">90s</div>
-                </div>
-            </div>
-            <div class="exercise-card">
-                <div class="ex-header">
-                    <div class="ex-number">2</div>
-                    <div class="ex-name">Press Inclinado con Mancuernas</div>
-                </div>
-                <div class="ex-stats">
-                    <div class="stat-pill">3 Series</div>
-                    <div class="stat-pill">10-12 Reps</div>
-                    <div class="stat-pill rest">90s</div>
-                </div>
-            </div>
-            <div class="exercise-card">
-                <div class="ex-header">
-                    <div class="ex-number">3</div>
-                    <div class="ex-name">Remo con Mancuerna a una Mano</div>
-                </div>
-                <div class="ex-stats">
-                    <div class="stat-pill">3 Series</div>
-                    <div class="stat-pill">10-12 Reps</div>
-                    <div class="stat-pill rest">90s</div>
-                </div>
-            </div>
-            <div class="exercise-card">
-                <div class="ex-header">
-                    <div class="ex-number" style="background-color: var(--pastel-pink);">4</div>
-                    <div class="ex-name">Curl de Isquiotibiales en Máquina</div>
-                </div>
-                <div class="ex-stats">
-                    <div class="stat-pill">3 Series</div>
-                    <div class="stat-pill">12-15 Reps</div>
-                    <div class="stat-pill rest">60s</div>
-                </div>
-            </div>
-            <div class="exercise-card">
-                <div class="ex-header">
-                    <div class="ex-number" style="background-color: var(--peach-orange);">5</div>
-                    <div class="ex-name">Plancha Abdominal (Core)</div>
-                </div>
-                <div class="ex-stats">
-                    <div class="stat-pill">3 Series</div>
-                    <div class="stat-pill">30-45 seg</div>
-                    <div class="stat-pill rest">60s</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- REGLAS DE EJECUCIÓN -->
-        <div class="rules-bento">
-            <div class="rule-item">
-                <div class="rule-title">Sobrecarga Progresiva</div>
-                <div class="rule-desc">La semana 1 usa pesos ligeros para técnica. Luego, intenta levantar más peso o sacar una repetición más que la semana anterior.</div>
-            </div>
-            <div class="rule-item">
-                <div class="rule-title">Tensión Bajo Control</div>
-                <div class="rule-desc">No uses impulso. Baja el peso lentamente (2-3s) y súbelo fuerte (1s). El músculo debe sentir la tensión real.</div>
-            </div>
-            <div class="rule-item">
-                <div class="rule-title">Intensidad RIR 1-2</div>
-                <div class="rule-desc">No llegues al fallo total donde pierdas la postura. Detén la serie dejando 1 o 2 repeticiones "en el tanque".</div>
-            </div>
-        </div>
-
-        <!-- TIMELINE DE PROGRESO (MES A MES) -->
-        <div class="timeline-bento">
-            <div class="info-header" style="margin-bottom: 5px;">
-                <div class="info-title">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                    Proyección Anual (Mes a Mes)
-                </div>
-            </div>
-            
-            <div class="timeline-item">
-                <div class="timeline-dot" style="background-color: var(--pale-yellow);"></div>
-                <div class="timeline-line"></div>
-                <div class="timeline-content">
-                    <div class="timeline-month">Mes 1</div>
-                    <div class="timeline-desc">Adaptación del sistema nervioso y mejoría postural. Aumento de apetito y sueño. <strong>Peso: +0.5 a 1 kg (48 kg)</strong>.</div>
-                </div>
-            </div>
-            
-            <div class="timeline-item">
-                <div class="timeline-dot" style="background-color: var(--peach-orange);"></div>
-                <div class="timeline-line"></div>
-                <div class="timeline-content">
-                    <div class="timeline-month">Mes 2</div>
-                    <div class="timeline-desc">Primeros cambios visibles en hombros y pecho al bombear. Mayor energía vespertina. <strong>Peso: ~49 kg</strong>.</div>
-                </div>
-            </div>
-            
-            <div class="timeline-item">
-                <div class="timeline-dot" style="background-color: var(--lavender);"></div>
-                <div class="timeline-line"></div>
-                <div class="timeline-content">
-                    <div class="timeline-month">Mes 3</div>
-                    <div class="timeline-desc">La ropa empieza a sentirse ligeramente más ajustada en brazos y espalda. Mejor control neuromuscular. <strong>Peso: ~50 kg</strong>.</div>
-                </div>
-            </div>
-            
-            <div class="timeline-item">
-                <div class="timeline-dot" style="background-color: var(--mint-green);"></div>
-                <div class="timeline-line"></div>
-                <div class="timeline-content">
-                    <div class="timeline-month">Mes 4</div>
-                    <div class="timeline-desc">Desarrollo inicial de la espalda en "V" y cuádriceps más firmes. El entrenamiento ya es un hábito sólido. <strong>Peso: ~51 kg</strong>.</div>
+                
+                <div class="status-block highlight">
+                    <div class="status-label">Meta a final de mes (Oct 21):</div>
+                    <div class="status-text">Mejoría postural, aumento de apetito y subida de peso (0.5 a 1 kg).</div>
                 </div>
             </div>
 
-            <div class="timeline-item">
-                <div class="timeline-dot" style="background-color: var(--pastel-pink);"></div>
-                <div class="timeline-line"></div>
-                <div class="timeline-content">
-                    <div class="timeline-month">Mes 5</div>
-                    <div class="timeline-desc">Aumento notable de fuerza en ejercicios compuestos (Prensa, Press). Los bíceps y tríceps toman forma. <strong>Peso: ~52 kg</strong>.</div>
+            <!-- Timeline Anual -->
+            <div class="bento-card">
+                <div class="bento-header" style="margin-bottom: 5px;">
+                    <div class="bento-title">Proyección Anual</div>
                 </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-dot" style="background-color: var(--pale-yellow);"></div>
-                <div class="timeline-line"></div>
-                <div class="timeline-content">
-                    <div class="timeline-month">Mes 6</div>
-                    <div class="timeline-desc">Físico atlético y marcado. Has superado la etapa de principiante. <strong>Peso: ~53 kg</strong>.</div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background-color: var(--pale-yellow);"></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-month">Mes 1</div>
+                        <div class="timeline-desc">Adaptación del sistema nervioso. <strong>Peso: ~48 kg</strong>.</div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-dot" style="background-color: var(--peach-orange);"></div>
-                <div class="timeline-line"></div>
-                <div class="timeline-content">
-                    <div class="timeline-month">Mes 7</div>
-                    <div class="timeline-desc">El progreso de peso se vuelve más lento (es normal). Mayor densidad muscular en el core y hombros. <strong>Peso: ~53.5 kg</strong>.</div>
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background-color: var(--peach-orange);"></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-month">Mes 2</div>
+                        <div class="timeline-desc">Primeros cambios en hombros/pecho. <strong>Peso: ~49 kg</strong>.</div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-dot" style="background-color: var(--lavender);"></div>
-                <div class="timeline-line"></div>
-                <div class="timeline-content">
-                    <div class="timeline-month">Mes 8</div>
-                    <div class="timeline-desc">Cambios en la vascularidad al entrenar. La dieta requerirá un ligero aumento calórico al tener más masa. <strong>Peso: ~54 kg</strong>.</div>
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background-color: var(--lavender);"></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-month">Mes 3</div>
+                        <div class="timeline-desc">Ropa ajustada. Control neuromuscular. <strong>Peso: ~50 kg</strong>.</div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-dot" style="background-color: var(--mint-green);"></div>
-                <div class="timeline-line"></div>
-                <div class="timeline-content">
-                    <div class="timeline-month">Mes 9</div>
-                    <div class="timeline-desc">Espalda visiblemente más ancha. Postura dominante y corrección de desequilibrios musculares. <strong>Peso: ~54.5 kg</strong>.</div>
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background-color: var(--mint-green);"></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-month">Mes 4</div>
+                        <div class="timeline-desc">Espalda en "V" y cuádriceps firmes. <strong>Peso: ~51 kg</strong>.</div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-dot" style="background-color: var(--pastel-pink);"></div>
-                <div class="timeline-line"></div>
-                <div class="timeline-content">
-                    <div class="timeline-month">Mes 10</div>
-                    <div class="timeline-desc">Rompes la barrera de los 55 kilos. Transformación estructural sólida y evidente con y sin camiseta. <strong>Peso: ~55 kg</strong>.</div>
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background-color: var(--pastel-pink);"></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-month">Mes 5</div>
+                        <div class="timeline-desc">Aumento de fuerza. Bíceps con forma. <strong>Peso: ~52 kg</strong>.</div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-dot" style="background-color: var(--pale-yellow);"></div>
-                <div class="timeline-line"></div>
-                <div class="timeline-content">
-                    <div class="timeline-month">Mes 11</div>
-                    <div class="timeline-desc">Consolidación de ganancias. Mayor resistencia y capacidad de trabajo en el gimnasio. <strong>Peso: ~55.5 kg</strong>.</div>
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background-color: var(--pale-yellow);"></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-month">Mes 6</div>
+                        <div class="timeline-desc">Físico atlético marcado. <strong>Peso: ~53 kg</strong>.</div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-dot" style="background-color: var(--peach-orange);"></div>
-                <div class="timeline-line" style="display: none;"></div>
-                <div class="timeline-content">
-                    <div class="timeline-month">Mes 12</div>
-                    <div class="timeline-desc">1 Año de consistencia. Físico totalmente transformado respecto a los 47 kg iniciales. Base muscular para toda la vida. <strong>Peso: ~56 kg</strong>.</div>
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background-color: var(--peach-orange);"></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-month">Mes 7</div>
+                        <div class="timeline-desc">Progreso de peso más lento pero denso. <strong>Peso: ~53.5 kg</strong>.</div>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background-color: var(--lavender);"></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-month">Mes 8</div>
+                        <div class="timeline-desc">Cambios en vascularidad. <strong>Peso: ~54 kg</strong>.</div>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background-color: var(--mint-green);"></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-month">Mes 9</div>
+                        <div class="timeline-desc">Postura dominante y espalda ancha. <strong>Peso: ~54.5 kg</strong>.</div>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background-color: var(--pastel-pink);"></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-month">Mes 10</div>
+                        <div class="timeline-desc">Transformación sólida. <strong>Peso: ~55 kg</strong>.</div>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background-color: var(--pale-yellow);"></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-month">Mes 11</div>
+                        <div class="timeline-desc">Capacidad de trabajo incrementada. <strong>Peso: ~55.5 kg</strong>.</div>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background-color: var(--peach-orange);"></div>
+                    <div class="timeline-line" style="display:none;"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-month">Mes 12</div>
+                        <div class="timeline-desc">1 Año: Base muscular permanente. <strong>Peso: ~56 kg</strong>.</div>
+                    </div>
                 </div>
             </div>
         </div>
 
     </div>
     
+    <!-- BARRA INFERIOR GLOBAL -->
     <nav class="bottom-nav">
         <a href="dinero.html" class="nav-item"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></a>
         <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></a>
@@ -727,9 +657,61 @@
     </nav>
 
     <script>
-        // --- LÓGICA DE LA BARRA DE PROGRESO DINÁMICA ---
+        // --- MASTER SWITCH ---
+        function switchMain(sectionId) {
+            // Actualizar botones principales
+            const tabs = document.querySelectorAll('.master-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            if (sectionId === 'gym') tabs[0].classList.add('active');
+            if (sectionId === 'comidas') tabs[1].classList.add('active');
+            if (sectionId === 'progreso') tabs[2].classList.add('active');
+
+            // Ocultar todas las secciones principales
+            const sections = document.querySelectorAll('.main-section');
+            sections.forEach(sec => sec.classList.remove('active'));
+
+            // Mostrar la seleccionada
+            document.getElementById('main-' + sectionId).classList.add('active');
+            
+            // Si es progreso, disparar la animación de la barra de nuevo
+            if(sectionId === 'progreso') {
+                document.getElementById('progress-bar').style.width = "0%";
+                setTimeout(calculateProgress, 50);
+            }
+        }
+
+        // --- SUB TABS RUTINA ---
+        function switchDay(dayId) {
+            const tabs = document.querySelectorAll('.day-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            const views = document.querySelectorAll('.routine-view');
+            views.forEach(view => view.classList.remove('active'));
+
+            if (dayId === 'lunes') tabs[0].classList.add('active');
+            if (dayId === 'miercoles') tabs[1].classList.add('active');
+            if (dayId === 'viernes') tabs[2].classList.add('active');
+
+            document.getElementById('view-' + dayId).classList.add('active');
+        }
+
+        // --- SUB TABS COMIDAS ---
+        function switchMeal(dayId) {
+            const tabs = document.querySelectorAll('.meal-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            const views = document.querySelectorAll('.meal-view');
+            views.forEach(view => view.classList.remove('active'));
+
+            if (dayId === 'lun-mie') tabs[0].classList.add('active');
+            if (dayId === 'mar-jue') tabs[1].classList.add('active');
+            if (dayId === 'vie') tabs[2].classList.add('active');
+
+            document.getElementById('meal-' + dayId).classList.add('active');
+        }
+
+        // --- CALCULO DE PROGRESO ---
         function calculateProgress() {
-            const startDate = new Date('2026-09-14T00:00:00'); 
+            const startDate = new Date('2026-09-21T00:00:00'); 
             const today = new Date();
             
             const diffTime = today - startDate;
@@ -766,23 +748,9 @@
             }
         }
 
-        // --- LÓGICA DE PESTAÑAS DE LA RUTINA ---
-        function switchDay(dayId) {
-            const tabs = document.querySelectorAll('.day-tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            
-            const views = document.querySelectorAll('.routine-view');
-            views.forEach(view => view.classList.remove('active'));
-
-            if (dayId === 'lunes') tabs[0].classList.add('active');
-            if (dayId === 'miercoles') tabs[1].classList.add('active');
-            if (dayId === 'viernes') tabs[2].classList.add('active');
-
-            document.getElementById('view-' + dayId).classList.add('active');
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(calculateProgress, 100);
+            // Inicializar progreso pero sin verlo a menos que esté activo, 
+            // el switchMain lo maneja al cambiar a la tab Progreso.
         });
 
         if ('serviceWorker' in navigator) {
